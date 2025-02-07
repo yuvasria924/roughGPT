@@ -1,22 +1,28 @@
 <script>
 	import { onMount } from 'svelte';
 
-	let { children } = $props();
+	let darkModeToggleSrc = "sun.svg"; // Default icon
+
 	function toggle() {
-		window.document.body.classList.toggle('dark-mode');
+		const body = window.document.body;
+		body.classList.toggle('dark-mode');
+
+		// Change icon when toggled
+		darkModeToggleSrc = body.classList.contains('dark-mode') ? "moon.svg" : "sun.svg";
 	}
-    let darkModeToggleSrc="sun.svg";
-	onMount(function () {
-        document.getElementById('dark-mode-toggle')?.addEventListener('click', toggle);
+
+	onMount(() => {
+		document.getElementById('dark-mode-toggle')?.addEventListener('click', toggle);
 	});
 </script>
 
-<img id="dark-mode-toggle" class="dark-mode-toggle" src={darkModeToggleSrc} alt="" />
+<img id="dark-mode-toggle" class="dark-mode-toggle" src="{darkModeToggleSrc}" alt="Toggle Dark Mode" />
 
 <img class="plug" src="plug.svg" alt="" />
 <img class="socket" src="socket.svg" alt="" />
 
-{@render children()}
+<!--  FIXED: This replaces the incorrect `{@render children()}` -->
+<slot />
 
 <style>
 	:global(body) .plug {
@@ -53,5 +59,17 @@
 		position: fixed;
 		right: 4%;
 		top: 4%;
+		cursor: pointer;
+	}
+	/*  Highlight effect on hover */
+	.dark-mode-toggle:hover {
+		filter: brightness(1.2); /* Slight highlight effect */
+		transform: scale(1.1);  /* Slight zoom effect */
+		transition: 0.2s ease-in-out; /* Smooth animation */
+	}
+
+	/*  Make the moon icon white when dark mode is active */
+	:global(body.dark-mode) .dark-mode-toggle {
+		filter: invert(1) brightness(2);
 	}
 </style>
