@@ -1,12 +1,29 @@
 <script>
 	/** @type {import('./$types').PageProps} */
 	let { data } = $props();
+	let apiKey = $state("");
+		
+	async function createIndex() {
+        const response = await fetch("/create-index", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ apiKey }),
+        });
+
+        await response.json();
+    }
 </script>
 
 <div class="div1">
 	<h1>{data.title}</h1>
-	<input id="pcKey" type="text" placeholder="Enter Pinecone API Key" maxlength="40" />
-	<button class="connect-button">Connect</button>
+	<input
+		id="pcKey"
+		type="text"
+		placeholder="Enter Pinecone API Key"
+		maxlength="40"
+		bind:value={apiKey}
+	/>
+	<button class="connect-button" onclick={createIndex}>Connect</button>
 </div>
 
 <style>
@@ -58,7 +75,9 @@
 		font-size: 1.5rem;
 		border: 2px solid white;
 		cursor: pointer;
-		transition: background-color 0.3s, color 0.3s;
+		transition:
+			background-color 0.3s,
+			color 0.3s;
 	}
 
 	:global(body.dark-mode) .connect-button {
