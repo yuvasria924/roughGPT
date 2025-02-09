@@ -10,7 +10,12 @@
             body: JSON.stringify({ apiKey }),
         });
 
-        await response.json();
+        const result= await response.json();
+		if(result.error)
+		{
+          alert(result.error);
+		}
+		
     }
 </script>
 
@@ -20,7 +25,7 @@
 		id="pcKey"
 		type="text"
 		placeholder="Enter Pinecone API Key"
-		maxlength="40"
+		maxlength="200"
 		bind:value={apiKey}
 	/>
 	<button class="connect-button" onclick={createIndex}>Connect</button>
