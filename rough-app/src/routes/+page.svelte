@@ -51,6 +51,7 @@
 
 	:global(body.dark-mode) h1 {
 		color: #fff;
+		transition: color 0.3s;
 	}
 
 	/* Input field */
@@ -83,6 +84,9 @@
 	:global(body.dark-mode) .connect-button {
 		background-color: #b79f5c;
 		color: black;
+		transition:
+			background-color 0.3s,
+			color 0.3s;
 	}
 
 	/* Centering body */
@@ -92,12 +96,6 @@
 		align-items: center;
 		height: 100vh;
 		margin: 0;
-		background-color: #b79f5c;
-		transition: background-color 0.3s;
-	}
-
-	:global(body.dark-mode) {
-		background-color: black;
 	}
 
 	/* Responsive design for smaller screens */

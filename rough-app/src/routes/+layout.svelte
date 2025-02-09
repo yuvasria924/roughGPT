@@ -12,6 +12,8 @@
 	}
 
 	onMount(() => {
+		toggle();
+		toggle();
 		document.getElementById('dark-mode-toggle')?.addEventListener('click', toggle);
 	});
 </script>
@@ -39,6 +41,16 @@
 		filter: invert(1);
 		transition: filter 0.3s;
 	}
+	
+	:global(body) {
+		background-color: #b79f5c;
+		transition: background-color 0.3s;
+	}
+
+	:global(body.dark-mode) {
+		background-color: black;
+		transition: background-color 0.3s;
+	}
 
 	:global(body) .socket {
 		width: 50vw;
@@ -60,6 +72,8 @@
 		right: 4%;
 		top: 4%;
 		cursor: pointer;
+		width: 3vw;
+		height: auto;
 	}
 	/*  Highlight effect on hover */
 	.dark-mode-toggle:hover {
