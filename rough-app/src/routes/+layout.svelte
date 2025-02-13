@@ -1,7 +1,16 @@
 <script>
 	import { onMount } from 'svelte';
+	import { setContext } from "svelte";
 
 	let darkModeToggleSrc = "sun.svg"; // Default icon
+	/**
+	 * @type {HTMLImageElement}
+	 */
+	let plug;
+	/**
+	 * @type {HTMLImageElement}
+	 */
+	let socket;
 
 	function toggle() {
 		const body = window.document.body;
@@ -11,6 +20,15 @@
 		darkModeToggleSrc = body.classList.contains('dark-mode') ? "moon.svg" : "sun.svg";
 	}
 
+	function connectAnimation(){
+		// Ensure plug exists before modifying it
+		if (plug) {
+			plug.classList.add("connected");
+			socket.classList.add("connected");
+		}
+	}
+
+	setContext("animations", {connectAnimation});
 	onMount(() => {
 		toggle();
 		toggle();
@@ -19,9 +37,9 @@
 </script>
 
 <img id="dark-mode-toggle" class="dark-mode-toggle" src="{darkModeToggleSrc}" alt="Toggle Dark Mode" />
-
-<img class="plug" src="plug.svg" alt="" />
-<img class="socket" src="socket.svg" alt="" />
+<!-- <button onclick="{connectAnimation}">test</button> -->
+<img bind:this={plug} class="plug" src="plug.svg" alt="" />
+<img bind:this={socket} class="socket" src="socket.svg" alt="" />
 
 <!--  FIXED: This replaces the incorrect `{@render children()}` -->
 <slot />
@@ -34,12 +52,17 @@
 		left: -8%;
 		bottom: 2.95vw;
 		filter: none;
-		transition: filter 0.3s;
+		transition: filter 0.3s, left 0.33s;
 	}
 
 	:global(body.dark-mode) .plug {
 		filter: invert(1);
-		transition: filter 0.3s;
+		transition: filter 0.3s, left 0.33s;
+	}
+
+	:global(body) :global(.plug.connected) {
+		left: 0%;
+		transition: left 0.33s;
 	}
 	
 	:global(body) {
@@ -59,14 +82,19 @@
 		position: fixed;
 		right: -10%;
 		filter: none;
-		transition: filter 0.3s;
+		transition: filter 0.3s, right 0.33s;
 	}
 
 	:global(body.dark-mode) .socket {
 		filter: invert(1);
-		transition: filter 0.3s;
+		transition: filter 0.3s, right 0.33s;
 	}
 
+	:global(body) :global(.socket.connected) {
+		right: 0%;
+		transition: right 0.33s;
+	}
+	
 	.dark-mode-toggle {
 		position: fixed;
 		right: 4%;

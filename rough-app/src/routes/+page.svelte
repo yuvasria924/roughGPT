@@ -1,22 +1,60 @@
 <script>
+	import { onMount } from 'svelte';
+	import { getContext } from 'svelte';
+	import { goto } from '$app/navigation';
+
 	/** @type {import('./$types').PageProps} */
 	let { data } = $props();
-	let apiKey = $state("");
-		
-	async function createIndex() {
-        const response = await fetch("/create-index", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ apiKey }),
-        });
+	let apiKey = $state('');
+	const animations = getContext('animations');
 
-        const result= await response.json();
-		if(result.error)
-		{
-          alert(result.error);
+	async function createIndex() {
+		const response = await fetch('/create-index', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ apiKey })
+		});
+
+		const result = await response.json();
+		if (result.error) {
+			alert(result.error);
+		} else {
+			animations.connectAnimation();
+			goto('/new');
 		}
+	}
+
+	function createRipple() {
+		const ripple = document.createElement('span');
+		ripple.classList.add('ripple');
+
+		const rect = document.body.getBoundingClientRect();
+		const size = Math.max(rect.width, rect.height);
+		ripple.style.width = ripple.style.height = `${size}px`;
+
+		const x = -50 + Math.random()*100;
+		const y = -100 + Math.random()*100;
+		ripple.style.left = `${x}%`;
+		ripple.style.top = `${y}%`;
+
+		document.body.appendChild(ripple);
+
+		ripple.addEventListener('animationend', () => {
+			ripple.remove();
+			createRipple();
+		});
+	}
+
+	onMount(() => {
+		document.getElementById('pcKey')?.addEventListener('keypress', async (ev) => {
+			if (ev.code == 'Enter') await createIndex();
+		});
 		
-    }
+		createRipple();
+		(new Promise(r => setTimeout(r, 3000))).then(()=> {createRipple();});
+		(new Promise(r => setTimeout(r, 6000))).then(()=> {createRipple();});
+		(new Promise(r => setTimeout(r, 9000))).then(()=> {createRipple();});	
+	});
 </script>
 
 <div class="div1">
@@ -123,6 +161,29 @@
 		:global(body) .connect-button {
 			font-size: 1.2rem;
 			padding: 0.8rem 1.5rem;
+		}
+	}
+
+	:global(.ripple) {
+		position: fixed;
+		width: 20px;
+		height: 20px;
+		z-index: -1;
+		background: rgba(26, 24, 24, 0);
+		border: 1.5vw dashed #000000;
+		border-radius: 50%;
+		transform: scale(0);
+		animation: ripple-effect 12s linear;
+	}
+
+	:global(body.dark-mode) :global(.ripple) {
+		border: 1.5vw dashed #ffffff;
+	}
+
+	@keyframes ripple-effect {
+		to {
+			transform: scale(15);
+			opacity: 0;
 		}
 	}
 </style>
