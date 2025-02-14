@@ -66,7 +66,7 @@
 	}
 	
 	:global(body) {
-		background-color: #b79f5c;
+		background-color: #d3b251;
 		transition: background-color 0.3s;
 	}
 
