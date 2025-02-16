@@ -61,7 +61,7 @@
 			filter 0.3s,
 			left 0.33s;
 	}
-
+	
 	:global(body.dark-mode) .plug {
 		filter: invert(1);
 		transition:
