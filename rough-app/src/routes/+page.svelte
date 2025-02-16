@@ -6,7 +6,12 @@
 	/** @type {import('./$types').PageProps} */
 	let { data } = $props();
 	let apiKey = $state('');
+	let landingPage = $state(true);
 	const animations = getContext('animations');
+	/**
+	 * @type {(HTMLSpanElement | undefined)[]}
+	 */
+	var ripples = [];
 
 	async function createIndex() {
 		const response = await fetch('/create-index', {
@@ -21,39 +26,42 @@
 		} else {
 			animations.connectAnimation();
 			goto('/new');
+			landingPage = false;
+			for (let index = 0; index < ripples.length; index++) {
+				ripples[index]?.remove();
+			}
 		}
 	}
 
-	function createRipple() {
-		const ripple = document.createElement('span');
-		ripple.classList.add('ripple');
+	/**
+	 * @param {number} [x]
+	 * @param {number} [y]
+	 */
+	function createRipple(x, y) {
+		if (landingPage) {
+			const ripple = document.createElement('span');
+			ripple.classList.add('ripple');
 
-		const rect = document.body.getBoundingClientRect();
-		const size = Math.max(rect.width, rect.height);
-		ripple.style.width = ripple.style.height = `${size}px`;
+			ripple.style.width = `${x==0?855:186}px`
+			ripple.style.height = `${x==0?855:186}px`;
 
-		const x = -50 + Math.random()*100;
-		const y = -100 + Math.random()*100;
-		ripple.style.left = `${x}%`;
-		ripple.style.top = `${y}%`;
+			ripple.style.left = `${x}%`;
+			ripple.style.top = `${y}%`;
 
-		document.body.appendChild(ripple);
-
-		ripple.addEventListener('animationend', () => {
-			ripple.remove();
-			createRipple();
-		});
+			document.body.appendChild(ripple);
+			return ripple;
+		}
 	}
 
 	onMount(() => {
 		document.getElementById('pcKey')?.addEventListener('keypress', async (ev) => {
 			if (ev.code == 'Enter') await createIndex();
 		});
-		
-		createRipple();
-		(new Promise(r => setTimeout(r, 3000))).then(()=> {createRipple();});
-		(new Promise(r => setTimeout(r, 6000))).then(()=> {createRipple();});
-		(new Promise(r => setTimeout(r, 9000))).then(()=> {createRipple();});	
+
+		ripples.push(createRipple(0, 0));
+		new Promise((r) => setTimeout(r, 1500)).then(() => {
+			ripples.push(createRipple(7.5, 7.5));
+		});
 	});
 </script>
 
@@ -140,6 +148,38 @@
 		height: 100vh;
 		margin: 0;
 	}
+	@keyframes ripple-effect {
+		to {
+			transform: scale(0.33);
+		}
+	}
+
+	@keyframes rotate-forever {
+		from {
+			transform: rotate(0deg) scale(0.33);
+		}
+		to {
+			transform: rotate(360deg) scale(0.33);
+		}
+	}
+
+	:global(.ripple) {
+		position: fixed;
+		width: 20px;
+		height: 20px;
+		z-index: -1;
+		background: rgba(26, 24, 24, 0);
+		border: 1.5vw dashed #887022;
+		border-radius: 50%;
+		transform: scale(0);
+		animation:
+			ripple-effect 1.5s linear forwards,
+			rotate-forever 5s linear infinite 1.5s;
+	}
+
+	:global(body.dark-mode) :global(.ripple) {
+		border: 1.5vw dashed #778fdd;
+	}
 
 	/* Responsive design for smaller screens */
 	@media (max-width: 768px) {
@@ -161,29 +201,6 @@
 		:global(body) .connect-button {
 			font-size: 1.2rem;
 			padding: 0.8rem 1.5rem;
-		}
-	}
-
-	:global(.ripple) {
-		position: fixed;
-		width: 20px;
-		height: 20px;
-		z-index: -1;
-		background: rgba(26, 24, 24, 0);
-		border: 1.5vw dashed #000000;
-		border-radius: 50%;
-		transform: scale(0);
-		animation: ripple-effect 12s linear;
-	}
-
-	:global(body.dark-mode) :global(.ripple) {
-		border: 1.5vw dashed #ffffff;
-	}
-
-	@keyframes ripple-effect {
-		to {
-			transform: scale(15);
-			opacity: 0;
 		}
 	}
 </style>
