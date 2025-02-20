@@ -1,4 +1,12 @@
 <script>
+import { goto } from '$app/navigation';
+
+function redirectToNotes() {
+  goto('/search');
+}
+
+
+
 	function resizeTextarea(event) {
    const textarea = event.target;
    textarea.style.height = "auto";  // Reset height
@@ -7,7 +15,7 @@
  </script>
  
  <main class="container">
- <button class="search-btn"> Search My Notes! </button>
+ <button class="search-btn" on:click={redirectToNotes}> Search My Notes! </button>
  <textarea cols="30" rows="30" placeholder="Write a Note Here!" on:input={resizeTextarea}>  </textarea>
  <button class="save-btn">Save Note</button>
  </main>
@@ -50,7 +58,7 @@
    height: 80vh;
    margin-left: auto;
    margin-right: auto;
-   background: linear-gradient(135deg, #cc7229, #966424, #ca6f19, #995e27);
+   background: linear-gradient(135deg, #cc7229, #64441a, #ca6f19, #995e27);
    background-size: 300% 300%;
    animation: gradientAnimation 4s ease infinite;
    border-radius: 1.4rem;
