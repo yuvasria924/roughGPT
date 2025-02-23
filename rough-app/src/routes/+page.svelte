@@ -120,7 +120,7 @@
 	/* Button */
 	:global(body) .connect-button {
 		background-color: black;
-		color: #b79f5c;
+		color: #d3b251;
 		font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 		padding: 1rem 2rem;
 		border-radius: 8px;
@@ -133,7 +133,7 @@
 	}
 
 	:global(body.dark-mode) .connect-button {
-		background-color: #b79f5c;
+		background-color: #d3b251;
 		color: black;
 		transition:
 			background-color 0.3s,

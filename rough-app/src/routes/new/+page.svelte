@@ -1,4 +1,7 @@
 <script>
+	/**
+	 * @param {{ target: any; }} event
+	 */
 	function resizeTextarea(event) {
    const textarea = event.target;
    textarea.style.height = "auto";  // Reset height
@@ -8,7 +11,7 @@
  
  <main class="container">
  <button class="search-btn"> Search My Notes! </button>
- <textarea cols="30" rows="30" placeholder="Write a Note Here!" on:input={resizeTextarea}>  </textarea>
+ <textarea class="text-area" cols="30" rows="30" placeholder="Write a Note Here!" on:input={resizeTextarea}></textarea>
  <button class="save-btn">Save Note</button>
  </main>
  
@@ -31,13 +34,12 @@
 	 background-position: 0% 50%;
    }
  }
+ 
  :global(body.dark-mode) .container {
-	background: linear-gradient(135deg, #4fcafa, #8cc5fa, #2883d8, #adf8fc);
-   animation: gradientAnimation 4s ease infinite;
+	background: linear-gradient(135deg, #000000, #778fdd, #000000, #778fdd);
+   animation: gradientAnimation 8s ease infinite;
    background-size: 300% 300%;
  }
-
-
 
    .container {
    display: flex;
@@ -47,10 +49,10 @@
    margin-top: 2rem;    
    width: 70vw;
    max-width: 80vw;
-   height: 80vh;
+   height: 70vh;
    margin-left: auto;
    margin-right: auto;
-   background: linear-gradient(135deg, #cc7229, #966424, #ca6f19, #995e27);
+   background: linear-gradient(135deg, #d3b251, #887022, #d3b251, #887022);
    background-size: 300% 300%;
    animation: gradientAnimation 4s ease infinite;
    border-radius: 1.4rem;
@@ -70,13 +72,23 @@
  }
 
  .search-btn {
-   background: #000000ee;
+   background: black;
    color: white;
+ }
+
+ :global(body.dark-mode) .search-btn{
+  background: white;
+  color: black;
  }
 
  .save-btn {
    background: #000000ee;
    color: white;
+ }
+
+ :global(body.dark-mode) .save-btn{
+  background: white;
+  color: black;
  }
 
  .search-btn:hover {
