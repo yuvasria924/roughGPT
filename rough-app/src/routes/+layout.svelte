@@ -131,12 +131,12 @@
 	/* Responsive design for smaller screens */
 	@media (max-width: 768px) {
 		:global(body) :global(.plug.connected) {
-			left: -1%;
+			left: -0.1%;
 			transition: left 0.33s;
 		}
 
 		:global(body) :global(.socket.connected) {
-			right: -1%;
+			right: -0.1%;
 			transition: right 0.33s;
 		}
 	}

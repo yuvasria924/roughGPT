@@ -17,8 +17,7 @@
 
 <main class="container">
 	<button class="search-btn" on:click={redirectToNotes}> Search My Notes! </button>
-	<textarea cols="30" rows="30" placeholder="Write a Note Here!" on:input={resizeTextarea}>
-	</textarea>
+	<textarea cols="30" rows="30" placeholder="Write a Note Here!" on:input={resizeTextarea}></textarea>
 	<button class="save-btn">Save Note</button>
 </main>
 
@@ -42,8 +41,8 @@
 	}
 
 	:global(body.dark-mode) .container {
-		background: linear-gradient(135deg, #000000, #778fdd, #000000, #778fdd);
-		animation: gradientAnimation 8s ease infinite;
+		background: linear-gradient(135deg, #ffffff, #778fdd, #ffffff, #778fdd);
+		animation: gradientAnimation 4s ease infinite;
 		background-size: 300% 300%;
 	}
 
@@ -53,6 +52,7 @@
 		align-items: center;
 		padding: 2rem;
 		margin-top: 2rem;
+    margin-bottom: auto;
 		width: 70vw;
 		max-width: 80vw;
 		height: 70vh;
@@ -79,34 +79,30 @@
 	}
 
 	.search-btn {
+    background: white;
+		color: black;
+	}
+
+	:global(body.dark-mode) .search-btn {
 		background: black;
 		color: white;
 	}
 
-	:global(body.dark-mode) .search-btn {
-		background: white;
-		color: black;
-	}
-
 	.save-btn {
-		background: #000000ee;
-		color: white;
+    background: white;
+		color: black;
 	}
 
 	:global(body.dark-mode) .save-btn {
-		background: white;
-		color: black;
+		background: #000000;
+		color: white;
 	}
 
 	.search-btn:hover {
-		background: #ffffff;
 		transform: scale(1.05);
-		color: black;
 	}
 
 	.save-btn:hover {
-		background: #fafafa;
-		color: black;
 		transform: scale(1.05);
 	}
 
@@ -115,6 +111,8 @@
 		max-width: 80%;
 		min-height: 60%;
 		border-radius: 1rem;
+    text-align: center;
+    align-content: center;
 		padding: 1rem;
 		font-size: 16px;
 		transition: border 0.1s ease-in-out;
@@ -126,6 +124,11 @@
 		border: 3px solid #1b1b1b;
 		outline: none;
 	}
+
+  :global(body.dark-mode) textarea {
+    background-color: black;
+    color: white;
+  }
 
 	@media (max-width: 600px) {
 		.container {
