@@ -1,31 +1,34 @@
 <script>
-	import { goto } from '$app/navigation';
-
-	function redirectToNotes() {
-		goto('/search');
-	}
-
 	/**
 	 * @param {{ target: any; }} event
 	 */
 	function resizeTextarea(event) {
 		const textarea = event.target;
+		const newFontSize = 14 - Math.sqrt(textarea.value.length) * 0.8;
+		const fontSize = (newFontSize < 2 ? 2 : newFontSize) + ((window.innerWidth / window.innerHeight)<1?'vw':'vh');
+		textarea.style.fontSize = fontSize;
 		textarea.style.height = 'auto'; // Reset height
 		textarea.style.height = textarea.scrollHeight + 'px'; // Adjust height based on content
 	}
 </script>
 
 <main class="container">
-	<button class="search-btn" on:click={redirectToNotes}> Search My Notes! </button>
-	<textarea cols="30" rows="30" placeholder="Write a Note Here!" on:input={resizeTextarea}></textarea>
-	<button class="save-btn">Save Note</button>
+	<textarea cols="30" rows="30" placeholder="Write Here!" on:input={resizeTextarea}></textarea>
+	<button class="save-btn">Save</button>
 </main>
 
 <style>
-	:global(body) {
-		display: flex;
-		justify-content: center;
-		align-items: center;
+	@property --angle {
+		syntax: '<angle>';
+		initial-value: 0deg;
+		inherits: false;
+	}
+
+	:global(body.dark-mode) .container {
+		--angle: 0deg;
+		background: linear-gradient(var(--angle), #778fdd, #a7bfff, #c7efff);
+		animation: rotateGradient 8s linear infinite;
+		background-size: 100% 100%;
 	}
 
 	@keyframes gradientAnimation {
@@ -39,11 +42,13 @@
 			background-position: 0% 50%;
 		}
 	}
-
-	:global(body.dark-mode) .container {
-		background: linear-gradient(135deg, #ffffff, #778fdd, #ffffff, #778fdd);
-		animation: gradientAnimation 4s ease infinite;
-		background-size: 300% 300%;
+	@keyframes rotateGradient {
+		from {
+			--angle: 0deg;
+		}
+		to {
+			--angle: 360deg;
+		}
 	}
 
 	.container {
@@ -51,98 +56,82 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 2rem;
-		margin-top: 2rem;
-    margin-bottom: auto;
+		margin-bottom: auto;
 		width: 70vw;
 		max-width: 80vw;
-		height: 70vh;
+		height: 55vh;
 		margin-left: auto;
 		margin-right: auto;
-		background: linear-gradient(135deg, #d3b251, #887022, #d3b251, #887022);
-		background-size: 300% 300%;
-		animation: gradientAnimation 4s ease infinite;
+		--angle: 0deg;
+		background: linear-gradient(var(--angle), #d3b251, #a38221, #735200);
+		animation: rotateGradient 8s linear infinite;
+		background-size: 100% 100%;
 		border-radius: 1.4rem;
 		box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 	}
 
-	.search-btn,
 	.save-btn {
-		margin: 1rem 0;
-		padding: 1rem;
-		border-radius: 3rem;
-		border: none;
-		font-size: 20px;
-		font-weight: bold;
-		cursor: pointer;
-		transition: all 0.3s ease-in-out;
-		width: 72%;
-	}
-
-	.search-btn {
-    background: white;
-		color: black;
-	}
-
-	:global(body.dark-mode) .search-btn {
-		background: black;
-		color: white;
-	}
-
-	.save-btn {
-    background: white;
+		background: white;
+		letter-spacing: 0.32ch;
+		border-color: black;
 		color: black;
 	}
 
 	:global(body.dark-mode) .save-btn {
 		background: #000000;
+		border-color: white;
 		color: white;
-	}
-
-	.search-btn:hover {
-		transform: scale(1.05);
 	}
 
 	.save-btn:hover {
 		transform: scale(1.05);
 	}
 
+	.save-btn {
+		margin: 1rem 0;
+		padding: 1rem;
+		border-radius: 1.4rem;
+		border: 2px solid black;
+		font-size: 20px;
+		font-weight: 800;
+		cursor: pointer;
+		transition: all 0.3s ease-in-out;
+		width: 90%;
+	}
+
 	textarea {
+		background-color: transparent;
+		color: white;
 		width: 100%;
 		max-width: 80%;
 		min-height: 60%;
 		border-radius: 1rem;
-    text-align: center;
-    align-content: center;
+		border: none;
+		outline: none;
+		text-align: justify;
+		align-content: center;
 		padding: 1rem;
-		font-size: 16px;
+		font-size: min(14vw, 14vh);
 		transition: border 0.1s ease-in-out;
 		resize: none;
 		overflow-y: hidden; /* Hides scrollbar while auto-expanding */
 	}
 
-	textarea:focus {
-		border: 3px solid #1b1b1b;
-		outline: none;
+	textarea::placeholder {
+		color: white;
+		text-align: center;
+		font-size: min(14vh, 14vw);
 	}
 
-  :global(body.dark-mode) textarea {
-    background-color: black;
-    color: white;
-  }
+	:global(body.dark-mode) textarea::placeholder {
+		color: black;
+	}
 
-	@media (max-width: 600px) {
-		.container {
-			padding: 1.5rem;
-		}
+	:global(body.dark-mode) textarea {
+		color: black;
+	}
 
-		.search-btn,
-		.save-btn {
-			font-size: 18px;
-			padding: 0.8rem;
-		}
-
-		textarea {
-			font-size: 14px;
-		}
+	@media (max-aspect-ratio: 3/2) {
+		
 	}
 </style>
