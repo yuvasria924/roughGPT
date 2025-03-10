@@ -5,7 +5,7 @@ dotenv.config(); // Load .env variables
 
 // Initialize Pinecone Client
 const pc = new Pinecone({
-  apiKey: process.env.VITE_PINECONE_API_KEY,
+  apiKey: "pcsk_2BGqCM_7p8nZzGsw3R7M1pcALXSgorKrTg2HrPrQF4Fc5y8Ld2hFLWNLMaCrLhf5V2C1LM"
 });
 
 // Type annotation for the insertRecord and fetchRecord functions
@@ -94,3 +94,69 @@ export async function fetchRecord(id) {
     return null; // Return null in case of an error
   }
 }
+
+
+
+// Function to chunk a long text into smaller parts
+function chunkText(text, chunkSize = 10) {
+  const words = text.split(" ");
+  let chunks = [];
+  for (let i = 0; i < words.length; i += chunkSize) {
+    chunks.push(words.slice(i, i + chunkSize).join(" "));
+  }
+  return chunks;
+}
+const index = pc.index("rough-man"); // Connect to your Pinecone index
+// Function to get text embeddings
+async function getEmbedding(text) {
+  
+  const response = await index.embedData({ 
+    model: "multilingual-e5-large", 
+    texts: [text] 
+  });
+  return response.embeddings[0]; // Extracts the vector embedding
+}
+
+// Function to insert a note into Pinecone
+async function insertNote(noteId, fullText) {
+  const chunks = chunkText(fullText);
+  let vectors = [];
+
+  for (let i = 0; i < chunks.length; i++) {
+    const embedding = await getEmbedding(chunks[i]);
+    vectors.push({
+      id: `${noteId}-${i}`,
+      values: embedding,
+      metadata: { full_text: fullText, chunk_index: i },
+    });
+  }
+
+  await index.upsert(vectors);
+  console.log("Note stored successfully!");
+}
+
+// Function to search for notes based on query
+async function searchNotes(query) {
+  const queryVector = await getEmbedding(query);
+  const results = await index.query({
+    vector: queryVector,
+    topK: 5,
+    includeMetadata: true,
+  });
+
+  let fullNotes = new Set();
+  results.matches.forEach((match) => fullNotes.add(match.metadata.full_text));
+
+  return Array.from(fullNotes);
+}
+
+// Example Usage
+(async () => {
+  const noteId = "note123";
+  const fullNote = "This is a long note that needs to be chunked and stored in Pinecone for efficient retrieval.";
+  await insertNote(noteId, fullNote);
+
+  const query = "long note";
+  const matchedNotes = await searchNotes(query);
+  console.log(matchedNotes); // Outputs matching full notes
+})();
