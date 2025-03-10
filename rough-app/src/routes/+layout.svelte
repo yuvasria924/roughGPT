@@ -1,8 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
 	import { setContext } from 'svelte';
+	import { goto } from '$app/navigation';
 
-	let darkModeToggleSrc = 'sun.svg'; // Default icon
+	let { children } = $props();
+
+	let darkModeToggleSrc = $state('/sun.svg'); // Default icon
 	/**
 	 * @type {HTMLImageElement}
 	 */
@@ -12,12 +15,19 @@
 	 */
 	let socket;
 
+	function logout() {
+		goto('/');
+		plug.classList.remove('connected');
+		socket.classList.remove('connected');
+		localStorage.removeItem('apiKey');
+	}
+
 	function toggle() {
 		const body = window.document.body;
 		body.classList.toggle('dark-mode');
 
 		// Change icon when toggled
-		darkModeToggleSrc = body.classList.contains('dark-mode') ? 'moon.svg' : 'sun.svg';
+		darkModeToggleSrc = body.classList.contains('dark-mode') ? '/moon.svg' : '/sun.svg';
 	}
 
 	function connectAnimation() {
@@ -33,6 +43,11 @@
 		toggle();
 		toggle();
 		document.getElementById('dark-mode-toggle')?.addEventListener('click', toggle);
+		plug.addEventListener('click', logout);
+		socket.addEventListener('click', logout);
+		if (localStorage.getItem('apiKey')) {
+			connectAnimation();
+		}
 	});
 </script>
 
@@ -42,12 +57,11 @@
 	src={darkModeToggleSrc}
 	alt="Toggle Dark Mode"
 />
-<!-- <button onclick="{connectAnimation}">test</button> -->
-<img bind:this={plug} class="plug" src="plug.svg" alt="" />
-<img bind:this={socket} class="socket" src="socket.svg" alt="" />
 
-<!--  FIXED: This replaces the incorrect `{@render children()}` -->
-<slot />
+<img bind:this={plug} class="plug" src="/plug.svg" alt="plug" />
+<img bind:this={socket} class="socket" src="/socket.svg" alt="socket" />
+
+{@render children()}
 
 <style>
 	:global(body) .plug {
@@ -57,11 +71,12 @@
 		left: -8%;
 		bottom: 2.95vw;
 		filter: none;
+		cursor:pointer;
 		transition:
 			filter 0.3s,
 			left 0.33s;
 	}
-	
+
 	:global(body.dark-mode) .plug {
 		filter: invert(1);
 		transition:
@@ -91,6 +106,7 @@
 		position: fixed;
 		right: -10%;
 		filter: none;
+		cursor:pointer;
 		transition:
 			filter 0.3s,
 			right 0.33s;
@@ -111,9 +127,9 @@
 	.dark-mode-toggle {
 		position: fixed;
 		right: 4%;
-		top: 4%;
+		top: 4.5%;
 		cursor: pointer;
-		width: 3vw;
+		width: 4vw;
 		height: auto;
 	}
 	/*  Highlight effect on hover */

@@ -6,6 +6,8 @@
 	/** @type {import('./$types').PageProps} */
 	let { data } = $props();
 	let apiKey = $state('');
+	let cloud = $state('aws');
+	let region = $state('us-east-1');
 	let landingPage = $state(true);
 	const animations = getContext('animations');
 	/**
@@ -17,13 +19,14 @@
 		const response = await fetch('/create-index', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ apiKey })
+			body: JSON.stringify({ apiKey, cloud, region })
 		});
 
 		const result = await response.json();
 		if (result.error) {
 			alert(result.error);
 		} else {
+			localStorage.setItem('apiKey', apiKey);
 			animations.connectAnimation();
 			goto('/new');
 			landingPage = false;
@@ -42,8 +45,8 @@
 			const ripple = document.createElement('span');
 			ripple.classList.add('ripple');
 
-			ripple.style.width = `${x==0?855:186}px`
-			ripple.style.height = `${x==0?855:186}px`;
+			ripple.style.width = `${x == 0 ? 855 : 186}px`;
+			ripple.style.height = `${x == 0 ? 855 : 186}px`;
 
 			ripple.style.left = `${x}%`;
 			ripple.style.top = `${y}%`;
@@ -54,14 +57,17 @@
 	}
 
 	onMount(() => {
-		document.getElementById('pcKey')?.addEventListener('keypress', async (ev) => {
-			if (ev.code == 'Enter') await createIndex();
-		});
+		if (localStorage.getItem('apiKey')) goto('/new');
+		else {
+			document.getElementById('pcKey')?.addEventListener('keypress', async (ev) => {
+				if (ev.code == 'Enter') await createIndex();
+			});
 
-		ripples.push(createRipple(0, 0));
-		new Promise((r) => setTimeout(r, 1500)).then(() => {
-			ripples.push(createRipple(7.5, 7.5));
-		});
+			ripples.push(createRipple(0, 0));
+			new Promise((r) => setTimeout(r, 1500)).then(() => {
+				ripples.push(createRipple(7.5, 7.5));
+			});
+		}
 	});
 </script>
 
@@ -74,6 +80,8 @@
 		maxlength="200"
 		bind:value={apiKey}
 	/>
+	<input id="cloud" type="text" placeholder="Cloud" maxlength="50" bind:value={cloud} />
+	<input id="region" type="text" placeholder="Region" maxlength="50" bind:value={region} />
 	<button class="connect-button" onclick={createIndex}>Connect</button>
 </div>
 
@@ -85,6 +93,8 @@
 		padding: 5%;
 		display: flex;
 		flex-direction: column;
+		margin-top: 3.6vh;
+		margin-bottom: auto;
 		justify-content: center;
 		align-items: center;
 		border-radius: 10px;
@@ -133,7 +143,7 @@
 	}
 
 	:global(body.dark-mode) .connect-button {
-		background-color: #d3b251;
+		background-color: #778fdd;
 		color: black;
 		transition:
 			background-color 0.3s,
@@ -169,7 +179,7 @@
 		height: 20px;
 		z-index: -1;
 		background: rgba(26, 24, 24, 0);
-		border: 1.5vw dashed #887022;
+		border: 1.5vw dashed #a38221;
 		border-radius: 50%;
 		transform: scale(0);
 		animation:
@@ -181,26 +191,11 @@
 		border: 1.5vw dashed #778fdd;
 	}
 
-	/* Responsive design for smaller screens */
-	@media (max-width: 768px) {
+	/* Responsive design for smaller resolutions */
+	@media (max-height: 768px) {
 		.div1 {
-			width: 90vw;
-			max-width: none;
-			padding: 10%;
-		}
-
-		:global(body) h1 {
-			font-size: clamp(1.5rem, 8vw, 3rem);
-		}
-
-		:global(body) input {
-			font-size: 1.2rem;
-			padding: 0.8rem;
-		}
-
-		:global(body) .connect-button {
-			font-size: 1.2rem;
-			padding: 0.8rem 1.5rem;
+			margin-top: 0vh;
+			padding: 2%;
 		}
 	}
 </style>

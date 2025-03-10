@@ -3,9 +3,9 @@ import { json } from "@sveltejs/kit";
 
 export async function POST({ request }) {
     try {
-        const { apiKey} = await request.json();
+        const { apiKey, cloud, region } = await request.json();
 
-        if (!apiKey) {
+        if (!apiKey || !cloud || !region) {
             return json({ error: "Missing required parameters" }, { status: 400 });
         }
 
@@ -16,7 +16,7 @@ export async function POST({ request }) {
 
         if (indexExists) {
             return json({ message: `Index "rough-man" already exists.` });
-        } 
+        }
 
         console.log(`Creating index "rough-man"...`);
 
@@ -26,8 +26,8 @@ export async function POST({ request }) {
             metric: "cosine", // Similarity metric: cosine, euclidean, dot_product
             spec: {
                 serverless: {
-                    cloud: "aws",
-                    region: "us-east-1"
+                    cloud: cloud,
+                    region: region
                 }
             }
         });
@@ -35,9 +35,9 @@ export async function POST({ request }) {
         return json({ message: `Index "rough-man" created successfully!` });
     } catch (error) {
         console.error("Error creating index:", error);
-        if(error instanceof Error)
-        return json({ error: error.message }, { status: 500 });
+        if (error instanceof Error)
+            return json({ error: error.message }, { status: 500 });
         else
-        return json({ error: "Unknown Error!" });    
+            return json({ error: "Unknown Error!" });
     }
 }
