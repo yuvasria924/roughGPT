@@ -1,6 +1,24 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import { json } from "@sveltejs/kit";
 
+// Function to get text embeddings
+async function getEmbedding(pc, texts) {
+    const response = await pc.inference.embed(
+        "multilingual-e5-large",
+        texts.map(d => d.text),
+        { inputType: 'passage', truncate: 'END' }
+    );
+
+
+    let n = response.length, i = 0;
+    let arr = [];
+
+    for (i = 0; i < n; i++) {
+        arr.push(response[i].values);
+    }
+    return arr;
+}
+
 export async function POST({ request }) {
     try {
         const { apiKey, cloud, region } = await request.json();
@@ -31,6 +49,21 @@ export async function POST({ request }) {
                 }
             }
         });
+
+        const index = pc.index("rough-man"); // Connect to your Pinecone index
+        let vectors = await getEmbedding(pc, [{ text: "count" }]);
+        let records = [{
+            id: 'count',
+            values: vectors[0],
+            metadata: { count: 0 },
+        }];
+        const fetchResult = await index.fetch(['count']);
+        if (fetchResult.records.count) {
+
+        }
+        else {
+            await index.upsert(records);
+        }
 
         return json({ message: `Index "rough-man" created successfully!` });
     } catch (error) {

@@ -59,29 +59,6 @@ async function insertNote(apiKey, fullText) {
   console.log("Note stored successfully!");
 }
 
-async function setupPinecone(apiKey) { 
-  const pc = new Pinecone({
-    apiKey: apiKey,
-  });
-    const index = pc.index("rough-man"); // Connect to your Pinecone index
-    let vectors= await getEmbedding(pc,[{text:"count"}]);
-    let records=[{
-      id: 'count',
-      values: vectors[0],
-      metadata: {count:0},
-    }];
-    const fetchResult = await index.fetch(['count']);
-if(fetchResult.records.count)
-{
-   
-}
-else{
-  await index.upsert(records);
-}
-  
-    
-}
-
 // Function to search for notes based on query
 async function searchNotes(query) {
   const queryVector = await getEmbedding(query);

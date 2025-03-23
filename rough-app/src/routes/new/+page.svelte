@@ -10,11 +10,33 @@
 		textarea.style.height = 'auto'; // Reset height
 		textarea.style.height = textarea.scrollHeight + 'px'; // Adjust height based on content
 	}
+
+	async function insertNote() {
+		const textbox = window.document.getElementById("textbox");
+		const textboxText = textbox?.value;
+		if (textboxText.trim() == "")
+			return null;
+		textbox.setAttribute('placeholder', "Saving....");
+		textbox.value = "";
+		const response = await fetch('/insert-note', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ apiKey: localStorage.getItem("apiKey"), fullText: textboxText})
+		});
+
+		const result = await response.json();
+		if (result.error) {
+			textbox.setAttribute('placeholder', "Failed to save.");
+			alert(result.error);
+		} else {
+			textbox.setAttribute('placeholder', "Saved!");
+		}
+	}
 </script>
 
 <main class="container">
-	<textarea cols="30" rows="30" placeholder="Write Here!" on:input={resizeTextarea}></textarea>
-	<button class="save-btn">Save</button>
+	<textarea id="textbox" cols="30" rows="30" placeholder="Write Here!" oninput={resizeTextarea}></textarea>
+	<button class="save-btn" onclick={insertNote}>Save</button>
 </main>
 
 <style>
