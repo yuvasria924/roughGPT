@@ -16,13 +16,14 @@ function chunkText(text, chunkSize = 30) {
 
 // Function to get text embeddings
 async function getEmbedding(pc, texts) {
-const response = await pc.inference.embed(
+let response = await pc.inference.embed(
     "multilingual-e5-large", 
     texts.map(d => d.text),
-    {inputType: 'passage', truncate: 'END'}
+    {inputType: 'query', truncate: 'END'}
   );
-  
-  
+
+    response=response.data;
+
     let n=response.length, i=0 ;
     let arr=[];
     
@@ -59,28 +60,23 @@ async function insertNote(apiKey, fullText) {
   console.log("Note stored successfully!");
 }
 
-// Function to search for notes based on query
-async function searchNotes(query) {
-  const queryVector = await getEmbedding(query);
-  const results = await index.query({
-    vector: queryVector,
-    topK: 5,
+
+async function searchNotes(apiKey) {
+const pc = new Pinecone({ apiKey });
+  let texts = [{text:"AI"}];
+  // Wait for the embedding to be generated
+const vector = await getEmbedding(pc, texts);
+console.log(vector);
+  const index = pc.index("rough-man");
+  
+  // Replace with an actual embedded vector
+  const response = await index.query({
+    vector: vector[0], // Your real vector here
+    topK: 2,
     includeMetadata: true,
   });
 
-  let fullNotes = new Set();
-  results.matches.forEach((match) => fullNotes.add(match.metadata.full_text));
-
-  return Array.from(fullNotes);
+  console.log(response);
 }
 
-// Example Usage
-// (async () => {
-//   const noteId = "note123";
-//   const fullNote = "This is a long note that needs to be chunked and stored in Pinecone for efficient retrieval.";
-//   await insertNote(noteId, fullNote);
-
-//   const query = "long note";
-//   const matchedNotes = await searchNotes(query);
-//   console.log(matchedNotes); // Outputs matching full notes
-// })();
+searchNotes("pcsk_2BGqCM_7p8nZzGsw3R7M1pcALXSgorKrTg2HrPrQF4Fc5y8Ld2hFLWNLMaCrLhf5V2C1LM");

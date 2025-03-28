@@ -3,23 +3,26 @@ import { json } from "@sveltejs/kit";
 
 // Function to get text embeddings
 async function getEmbedding(pc, texts) {
-    const response = await pc.inference.embed(
-        "multilingual-e5-large",
+    let response = await pc.inference.embed(
+        "multilingual-e5-large", 
         texts.map(d => d.text),
-        { inputType: 'passage', truncate: 'END' }
-    );
-
-
-    let n = response.length, i = 0;
-    let arr = [];
-
-    for (i = 0; i < n; i++) {
-        arr.push(response[i].values);
+        {inputType: 'query', truncate: 'END'}
+      );
+    
+        response=response.data;
+    
+        let n=response.length, i=0 ;
+        let arr=[];
+        
+        for(i=0;i<n;i++)
+         {
+          arr.push(response[i].values);
+         }
+         return arr;
     }
-    return arr;
-}
 
 export async function POST({ request }) {
+    
     try {
         const { apiKey, cloud, region } = await request.json();
 
@@ -33,9 +36,10 @@ export async function POST({ request }) {
         const indexExists = indexList.some(index => index.name === "rough-man");
 
         if (indexExists) {
-            return json({ message: `Index "rough-man" already exists.` });
+           console.log("Index rough-man Already Exists!"); 
         }
-
+        else{
+        
         console.log(`Creating index "rough-man"...`);
 
         await pc.createIndex({
@@ -49,7 +53,7 @@ export async function POST({ request }) {
                 }
             }
         });
-
+    }
         const index = pc.index("rough-man"); // Connect to your Pinecone index
         let vectors = await getEmbedding(pc, [{ text: "count" }]);
         let records = [{

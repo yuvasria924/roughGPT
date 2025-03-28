@@ -16,21 +16,23 @@ function chunkText(text, chunkSize = 30) {
 
 // Function to get text embeddings
 async function getEmbedding(pc, texts) {
-    const response = await pc.inference.embed(
-        "multilingual-e5-large",
+    let response = await pc.inference.embed(
+        "multilingual-e5-large", 
         texts.map(d => d.text),
-        { inputType: 'passage', truncate: 'END' }
-    );
-
-
-    let n = response.length, i = 0;
-    let arr = [];
-
-    for (i = 0; i < n; i++) {
-        arr.push(response[i].values);
+        {inputType: 'query', truncate: 'END'}
+      );
+    
+        response=response.data;
+    
+        let n=response.length, i=0 ;
+        let arr=[];
+        
+        for(i=0;i<n;i++)
+         {
+          arr.push(response[i].values);
+         }
+         return arr;
     }
-    return arr;
-}
 
 
 // Function to insert a note into Pinecone
