@@ -17,6 +17,7 @@
 			const searchInput = window.document.getElementById('search-input') as HTMLInputElement;
 			if (searchInput.value != ''){
                 sessionStorage.setItem("query", searchInput.value);
+				window.dispatchEvent(new Event('query-changed'));
                 goto('/new/search');
             }
 		}

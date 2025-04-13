@@ -61,22 +61,24 @@ async function insertNote(apiKey, fullText) {
 }
 
 
-async function searchNotes(apiKey) {
+async function searchNotes(apiKey, text) {
 const pc = new Pinecone({ apiKey });
-  let texts = [{text:"AI"}];
+  let texts = [{text}];
   // Wait for the embedding to be generated
 const vector = await getEmbedding(pc, texts);
-console.log(vector);
   const index = pc.index("rough-man");
   
   // Replace with an actual embedded vector
   const response = await index.query({
     vector: vector[0], // Your real vector here
-    topK: 2,
+    topK: 100,
     includeMetadata: true,
   });
 
-  console.log(response);
+  var matches = [];
+  for(let index=0; index<response.matches.length; index++){
+    if(response.matches[index].id.includes("-"))
+      matches.push(response.matches[index].metadata?.full_text);
+  }
+  return [...new Set(matches)];
 }
-
-searchNotes("pcsk_2BGqCM_7p8nZzGsw3R7M1pcALXSgorKrTg2HrPrQF4Fc5y8Ld2hFLWNLMaCrLhf5V2C1LM");
