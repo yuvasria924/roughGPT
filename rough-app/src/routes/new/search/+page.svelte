@@ -30,27 +30,85 @@
 			window.removeEventListener('query-changed', handleQueryChange);
 		};
 	});
+
+	function getFadedBgStyle(index, total) {
+	const maxOpacity = 1;
+	const minOpacity = 0.2;
+
+	const bgOpacity = maxOpacity - ((maxOpacity - minOpacity) * (index / (total - 1 || 1)));
+
+	// White background with variable alpha
+	return `background-color: rgba(255, 255, 255, ${bgOpacity});`;
+}
 </script>
 
 <div class="plates">
-	{#each items as item} 
-		<div class="note">{item}</div>
+	{#each items as item, index (index)} 
+		<div class="note" style={getFadedBgStyle(index, items.length)}>{item}</div>
 	{/each}
 </div>
 
 <style>
-	.plates {
-		width: 200px;
-		height: 200px;
-		background-color: red;
-		overflow: auto;
+@property --angle {
+		syntax: '<angle>';
+		initial-value: 0deg;
+		inherits: false;
 	}
 
+	@keyframes gradientAnimation {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+	@keyframes rotateGradient {
+		from {
+			--angle: 0deg;
+		}
+		to {
+			--angle: 360deg;
+		}
+	}
+	.plates {
+		width: 90vw;
+		height: 55vh;
+		overflow: auto;
+		display: flex;
+        align-items: center;
+		justify-content: flex-start;
+		border-radius: 1rem;
+		background: transparent;
+	}
+	:global(body.dark-mode) .note {
+		background-color: #778fdd;
+		color: #000000;
+		transition: background-color 0.3s, color 0.3s;
+			border: 2px solid #778fdd;
+	}
 	.note {
 		background-color: white;
-		color: black;
-		margin: 5px;
-		padding: 10px;
-		border-radius: 5px;
+		margin: 1rem;
+		padding: 1rem;
+		border-radius: 1rem;
+		overflow: auto;
+      
+		min-width: 10rem;
+		width: 10rem;
+		height: 10rem;
+
+		border: 2px solid rgb(0, 0, 0);
+		transition: opacity 0.3s ease, transform 0.3s ease;
 	}
+	.note::-webkit-scrollbar{
+		display: none;
+	}
+.note:hover {
+	transform: scale(1.05);
+	cursor: pointer;
+}
 </style>
