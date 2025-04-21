@@ -184,9 +184,14 @@
 	z-index: 1000;
 }
 
+:global(body.dark-mode) .note-editor {
+	background: #778fdd;
+}
+
 .editor-text {
 	height: 700px;
 	width: 96%;
+	background: transparent;
 	max-width: 96%;
 	max-height: 60vh;
 	min-height: 60vh;

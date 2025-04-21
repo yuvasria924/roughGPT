@@ -40,7 +40,7 @@ export async function POST({ request }) {
           // Replace with an actual embedded vector
           const response = await index.query({
             vector: vector[0], // Your real vector here
-            topK: 100,
+            topK: 80,
             includeMetadata: true,
           });
         
@@ -48,6 +48,32 @@ export async function POST({ request }) {
           for(let index=0; index<response.matches.length; index++){
             if(response.matches[index].id.includes("-"))
               matches.push(response.matches[index].metadata?.full_text);
+          }
+          matches = [...new Set(matches)];
+          var documents = [];
+          const rerankingModel = 'bge-reranker-v2-m3';
+          for (let index=0; index<matches.length; index++){
+            documents.push({id:'vec'+index, text: matches[index]});
+          }
+          const query = text;
+          const rerankOptions = {
+            topN: 80,
+            returnDocuments: true,
+            parameters: {
+              truncate: 'END'
+            }, 
+          };
+
+          const response2 = await pc.inference.rerank(
+            rerankingModel,
+            query,
+            documents,
+            rerankOptions
+          );
+          
+          matches = [];
+          for(let index=0; index<response2.data.length;index++){
+            matches.push(response2.data[index].document?.text);
           }
           return json({data:[...new Set(matches)]});
     } catch (error) {
