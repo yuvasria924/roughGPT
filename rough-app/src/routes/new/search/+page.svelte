@@ -36,7 +36,6 @@
 			window.removeEventListener('query-changed', handleQueryChange);
 		};
 	});
-
 	function getFadedBgStyle(index, total) {
 		const maxOpacity = 1;
 		const minOpacity = 0.2;
@@ -45,17 +44,20 @@
 	}
 
 	function openEditor(note) {
+		console.log("📝 Opening:", note);
 		selectedNote = note;
 		editorVisible = true;
-		document.body.style.overflow = 'hidden'; // prevent scroll
+		document.body.style.overflow = 'hidden';
 	}
 
 	function closeEditor() {
 		editorVisible = false;
 		selectedNote = null;
-		document.body.style.overflow = 'auto'; // restore scroll
+		document.body.style.overflow = 'auto';
 	}
+
 </script>
+
 
 {#if loading}
 	<div class="loading-indicator">Loading...</div>
@@ -63,19 +65,20 @@
 
 <!-- Notes Display -->
 <div class="plates">
-	{#each items as item, index (index)}
-		<div
-			class="note"
-			style={getFadedBgStyle(index, items.length)}
-			on:click={() => openEditor(item)}
-			role="button"
-			tabindex="0"
-			on:keydown={(e) => e.key === 'Enter' && openEditor(item)}
-		>
-			{item}
-		</div>
-	{/each}
+    {#each items as item, index (item)}
+        <div
+            class="note"
+            style={getFadedBgStyle(index, items.length)}
+            on:click={() => openEditor(item)}
+            role="button"
+            tabindex="0"
+            on:keydown={(e) => e.key === 'Enter' && openEditor(item)}
+        >
+            {item}
+        </div>
+    {/each}
 </div>
+
 
 <!-- Editor Modal -->
 {#if editorVisible}
@@ -89,11 +92,15 @@
 			aria-label="Close editor"
 		></div>
 		<div class="note-editor">
-			<button class="close-btn" on:click={closeEditor}>✖</button>
+			<button class="delete-btn" on:click={closeEditor}>
+				🗑 Delete
+			</button>
+
 			<textarea bind:value={selectedNote} class="editor-text"></textarea>
 		</div>
 	</div>
 {/if}
+
 
 <style>
 	@property --angle {
@@ -293,14 +300,21 @@
 		display: none; /* Chrome, Safari */
 	}
 
-	.close-btn {
+	.delete-btn {
 		position: absolute;
-		top: 9px;
-		right: 9px;
-		background: none;
-		border: none;
-		font-size: 1rem;
-		cursor: pointer;
-		color: #333;
-	}
+	top: 10px;
+	right: 15px;
+	background-color: #ff4d4d;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	padding: 5px 10px;
+	font-size: 10px;
+	cursor: pointer;
+	z-index: 10;
+}
+.delete-btn:hover {
+	background-color: #e60000;
+}
+
 </style>
