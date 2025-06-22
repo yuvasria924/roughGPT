@@ -4,6 +4,7 @@
 	let items = [];
 	let selectedNote = null;
 	let editorVisible = false;
+	let deleting = false;
 
 	function fetchNotes(query) {
 		loading = true;
@@ -15,6 +16,7 @@
 			.then((response) => response.json())
 			.then((result) => {
 				items = result.data;
+
 			})
 			.finally(() => {
 				loading = false;
@@ -44,7 +46,6 @@
 	}
 
 	function openEditor(note) {
-		console.log("📝 Opening:", note);
 		selectedNote = note;
 		editorVisible = true;
 		document.body.style.overflow = 'hidden';
@@ -55,8 +56,42 @@
 		selectedNote = null;
 		document.body.style.overflow = 'auto';
 	}
+  async function deleteNote() {
+    if (selectedNote) {
+		deleting = true;
+        try {
+            const response = await fetch('/delete-note', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    apiKey: localStorage.getItem('apiKey'),
+                    fullText: selectedNote // or selectedNote.text, depending on your note structure
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Remove from UI
+		
+                items = items.filter(item => item !== selectedNote);
+                closeEditor();
+
+            } else {
+                alert('Failed to delete note: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            alert('Failed to delete note. Please try again.');
+        }
+		finally {
+            deleting = false;
+        }
+    }
+}
 
 </script>
+
 
 
 {#if loading}
@@ -92,9 +127,13 @@
 			aria-label="Close editor"
 		></div>
 		<div class="note-editor">
-			<button class="delete-btn" on:click={closeEditor}>
+			<button class="delete-btn" on:click={deleteNote}>
 				🗑 Delete
 			</button>
+
+			{#if deleting}
+    <div class="delete-indicator">Deleting...</div>
+{/if} 
 
 			<textarea bind:value={selectedNote} class="editor-text"></textarea>
 		</div>
@@ -137,6 +176,23 @@
 		color: #555;
 		animation: pulse 1.5s infinite ease-in-out;
 	}
+
+	.delete-indicator {
+		  position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #555;
+    animation: pulse 1.5s infinite ease-in-out;
+    background: rgba(255,255,255,0.9); /* Optional: adds a white overlay */
+    padding: 1.5rem 2.5rem;
+    border-radius: 1rem;
+    z-index: 20;
+}
 
 	@keyframes pulse {
 		0% {
@@ -252,6 +308,8 @@
 	/* Modal Content */
 	.note-editor {
 		display: flex;
+		flex-direction: column; /* Add this line */
+        align-items: center;    /* Add this line */
 		justify-content: center;
 		position: relative;
 		background: white;
