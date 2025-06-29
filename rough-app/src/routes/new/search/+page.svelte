@@ -128,7 +128,7 @@
 		></div>
 		<div class="note-editor">
 			<button class="delete-btn" on:click={deleteNote}>
-				🗑 Delete
+				Delete
 			</button>
 
 			{#if deleting}
