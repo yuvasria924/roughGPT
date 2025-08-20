@@ -20,22 +20,14 @@
   let hoverable = false;
   
   /**
-   * @type {boolean}
-   */
-  let clickable = false;
-  
-  /**
    * @type {string}
    */
   let customClass = '';
 
   let { children, onclick, ...props } = $props();
 
-  $effect(() => {
-    if (onclick) {
-      clickable = true;
-    }
-  });
+  // Derive clickable from the presence of onclick handler
+  let clickable = $derived(!!onclick);
 </script>
 
 <div
