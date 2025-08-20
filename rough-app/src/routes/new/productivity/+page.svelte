@@ -349,9 +349,21 @@
   }
 
   .empty-icon {
-    font-size: 4rem;
-    margin-bottom: var(--space-4);
-    opacity: 0.7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto var(--space-4) auto;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-lg);
+    color: white;
+    opacity: 0.8;
+  }
+
+  .empty-svg {
+    width: 2rem;
+    height: 2rem;
   }
 
   .empty-title {
