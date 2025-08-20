@@ -1,159 +1,366 @@
 <script>
+	import Card from '$lib/components/Card.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import { onMount } from 'svelte';
+
+	let noteText = $state('');
+	let isSaving = $state(false);
+	let saveStatus = $state('');
+	let saveStatusType = $state(''); // 'success' | 'error' | ''
+	let wordCount = $derived(noteText.trim().split(/\s+/).filter(word => word.length > 0).length);
+	let charCount = $derived(noteText.length);
+
 	/**
-	 * @param {{ target: any; }} event
+	 * @type {HTMLTextAreaElement}
 	 */
-	function resizeTextarea(event) {
-		const textarea = event.target;
-		const newFontSize = 14 - Math.sqrt(textarea.value.length) * 0.8;
-		const fontSize = (newFontSize < 2 ? 2 : newFontSize) + ((window.innerWidth / window.innerHeight)<1?'vw':'vh');
-		textarea.style.fontSize = fontSize;
-		textarea.style.height = 'auto'; // Reset height
-		textarea.style.height = textarea.scrollHeight + 'px'; // Adjust height based on content
-	}
+	let textareaRef;
 
-	async function insertNote() {
-		const textbox = window.document.getElementById("textbox");
-		const textboxText = textbox?.value;
-		if (textboxText.trim() == "")
-			return null;
-		textbox.setAttribute('placeholder', "Saving....");
-		textbox.value = "";
-		const response = await fetch('/insert-note', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ apiKey: localStorage.getItem("apiKey"), fullText: textboxText})
-		});
-
-		const result = await response.json();
-		if (result.error) {
-			textbox.setAttribute('placeholder', "Failed to save.");
-			alert(result.error);
-		} else {
-			textbox.setAttribute('placeholder', "Saved!");
+	function autoResize() {
+		if (textareaRef) {
+			textareaRef.style.height = 'auto';
+			textareaRef.style.height = textareaRef.scrollHeight + 'px';
 		}
 	}
+
+	async function handleSave() {
+		if (!noteText.trim()) {
+			saveStatus = 'Please write something before saving';
+			saveStatusType = 'error';
+			return;
+		}
+
+		isSaving = true;
+		saveStatus = 'Saving...';
+		saveStatusType = '';
+
+		try {
+			const response = await fetch('/insert-note', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ 
+					apiKey: localStorage.getItem('apiKey'), 
+					fullText: noteText 
+				})
+			});
+
+			const result = await response.json();
+			
+			if (result.error) {
+				saveStatus = result.error;
+				saveStatusType = 'error';
+			} else {
+				saveStatus = 'Note saved successfully!';
+				saveStatusType = 'success';
+				noteText = '';
+				autoResize();
+			}
+		} catch (error) {
+			saveStatus = 'Failed to save note. Please try again.';
+			saveStatusType = 'error';
+		} finally {
+			isSaving = false;
+			// Clear status after 3 seconds
+			setTimeout(() => {
+				saveStatus = '';
+				saveStatusType = '';
+			}, 3000);
+		}
+	}
+
+	function handleKeyDown(event) {
+		// Save with Ctrl/Cmd + S
+		if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+			event.preventDefault();
+			handleSave();
+		}
+	}
+
+	onMount(() => {
+		// Focus the textarea on load
+		if (textareaRef) {
+			textareaRef.focus();
+		}
+	});
 </script>
 
-<main class="container">
-	<textarea id="textbox" cols="30" rows="30" placeholder="Write Here!" oninput={resizeTextarea}></textarea>
-	<button class="save-btn" onclick={insertNote}>Save</button>
+<main class="note-editor-container">
+	<div class="header">
+		<h1 class="page-title">Create Note</h1>
+		<p class="page-subtitle">Write your thoughts and save them to your vector database</p>
+	</div>
+
+	<Card size="lg" variant="elevated" customClass="editor-card">
+		<div class="editor-header">
+			<div class="editor-meta">
+				<span class="word-count">{wordCount} words</span>
+				<span class="char-count">{charCount} characters</span>
+			</div>
+			
+			{#if saveStatus}
+				<div class="save-status save-status-{saveStatusType}">
+					{saveStatus}
+				</div>
+			{/if}
+		</div>
+
+		<div class="editor-wrapper">
+			<textarea
+				bind:this={textareaRef}
+				bind:value={noteText}
+				class="note-textarea"
+				placeholder="Start writing your note..."
+				oninput={autoResize}
+				onkeydown={handleKeyDown}
+				disabled={isSaving}
+				rows="10"
+			></textarea>
+		</div>
+
+		<div class="editor-actions">
+			<div class="keyboard-shortcut">
+				<kbd>Ctrl</kbd> + <kbd>S</kbd> to save
+			</div>
+			
+			<Button
+				variant="primary"
+				size="lg"
+				loading={isSaving}
+				onclick={handleSave}
+				disabled={!noteText.trim()}
+			>
+				{#if isSaving}
+					Saving...
+				{:else}
+					Save Note
+				{/if}
+			</Button>
+		</div>
+	</Card>
+
+	<div class="tips-section">
+		<Card size="sm" customClass="tip-card">
+			<h3 class="tip-title">💡 Tips</h3>
+			<ul class="tip-list">
+				<li>Your notes are automatically indexed for semantic search</li>
+				<li>Use descriptive content for better search results</li>
+				<li>Save frequently with <kbd>Ctrl+S</kbd></li>
+			</ul>
+		</Card>
+	</div>
 </main>
 
 <style>
-	@property --angle {
-		syntax: '<angle>';
-		initial-value: 0deg;
-		inherits: false;
-	}
-
-	:global(body.dark-mode) .container {
-		--angle: 0deg;
-		background: linear-gradient(var(--angle), #778fdd, #a7bfff, #c7efff);
-		animation: rotateGradient 8s linear infinite;
-		background-size: 100% 100%;
-	}
-
-	@keyframes gradientAnimation {
-		0% {
-			background-position: 0% 50%;
-		}
-		50% {
-			background-position: 100% 50%;
-		}
-		100% {
-			background-position: 0% 50%;
-		}
-	}
-	@keyframes rotateGradient {
-		from {
-			--angle: 0deg;
-		}
-		to {
-			--angle: 360deg;
-		}
-	}
-
-	.container {
+	.note-editor-container {
+		max-width: 900px;
+		margin: 0 auto;
+		padding: var(--space-8) var(--space-4);
+		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		padding: 2rem;
-		margin-bottom: auto;
-		width: 70vw;
-		max-width: 80vw;
-		height: 55vh;
-		margin-left: auto;
-		margin-right: auto;
-		--angle: 0deg;
-		background: linear-gradient(var(--angle), #d3b251, #a38221, #735200);
-		animation: rotateGradient 8s linear infinite;
-		background-size: 100% 100%;
-		border-radius: 1.4rem;
-		box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+		gap: var(--space-8);
 	}
 
-	.save-btn {
-		background: white;
-		letter-spacing: 0.32ch;
-		border-color: black;
-		color: black;
-	}
-
-	:global(body.dark-mode) .save-btn {
-		background: #000000;
-		border-color: white;
-		color: white;
-	}
-
-	.save-btn:hover {
-		transform: scale(1.05);
-	}
-
-	.save-btn {
-		margin: 1rem 0;
-		padding: 1rem;
-		border-radius: 1.4rem;
-		border: 2px solid black;
-		font-size: 20px;
-		font-weight: 800;
-		cursor: pointer;
-		transition: all 0.3s ease-in-out;
-		width: 90%;
-	}
-
-	textarea {
-		background-color: transparent;
-		color: white;
-		width: 100%;
-		max-width: 80%;
-		min-height: 60%;
-		border-radius: 1rem;
-		border: none;
-		outline: none;
-		text-align: justify;
-		align-content: center;
-		padding: 1rem;
-		font-size: min(14vw, 14vh);
-		transition: border 0.1s ease-in-out;
-		resize: none;
-		overflow-y: hidden; /* Hides scrollbar while auto-expanding */
-	}
-
-	textarea::placeholder {
-		color: white;
+	.header {
 		text-align: center;
-		font-size: min(14vh, 14vw);
+		animation: slideUp var(--transition-slow) ease-out;
 	}
 
-	:global(body.dark-mode) textarea::placeholder {
-		color: black;
+	.page-title {
+		font-size: var(--font-size-4xl);
+		font-weight: 700;
+		color: var(--text-primary);
+		margin-bottom: var(--space-2);
 	}
 
-	:global(body.dark-mode) textarea {
-		color: black;
+	.page-subtitle {
+		font-size: var(--font-size-lg);
+		color: var(--text-secondary);
+		line-height: var(--line-height-relaxed);
 	}
 
-	@media (max-aspect-ratio: 3/2) {
-		
+	.editor-card {
+		width: 100%;
+		animation: scaleIn var(--transition-slow) ease-out 0.2s both;
+	}
+
+	.editor-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-4);
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.editor-meta {
+		display: flex;
+		gap: var(--space-4);
+		font-size: var(--font-size-sm);
+		color: var(--text-tertiary);
+	}
+
+	.word-count, .char-count {
+		font-weight: 500;
+	}
+
+	.save-status {
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-md);
+		font-size: var(--font-size-sm);
+		font-weight: 500;
+		animation: slideUp var(--transition-base) ease-out;
+	}
+
+	.save-status-success {
+		background-color: #d1fae5;
+		color: #065f46;
+		border: 1px solid #a7f3d0;
+	}
+
+	.save-status-error {
+		background-color: #fee2e2;
+		color: #991b1b;
+		border: 1px solid #fecaca;
+	}
+
+	[data-theme="dark"] .save-status-success {
+		background-color: rgba(16, 185, 129, 0.2);
+		color: #6ee7b7;
+		border-color: rgba(16, 185, 129, 0.3);
+	}
+
+	[data-theme="dark"] .save-status-error {
+		background-color: rgba(239, 68, 68, 0.2);
+		color: #fca5a5;
+		border-color: rgba(239, 68, 68, 0.3);
+	}
+
+	.editor-wrapper {
+		position: relative;
+		margin-bottom: var(--space-6);
+	}
+
+	.note-textarea {
+		width: 100%;
+		min-height: 400px;
+		padding: var(--space-4);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-lg);
+		background-color: var(--bg-primary);
+		color: var(--text-primary);
+		font-size: var(--font-size-base);
+		line-height: var(--line-height-relaxed);
+		font-family: var(--font-family-sans);
+		resize: vertical;
+		transition: all var(--transition-base);
+		outline: none;
+	}
+
+	.note-textarea:focus {
+		border-color: var(--border-focus);
+		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+	}
+
+	.note-textarea::placeholder {
+		color: var(--text-tertiary);
+	}
+
+	.note-textarea:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		background-color: var(--bg-secondary);
+	}
+
+	.editor-actions {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--space-4);
+	}
+
+	.keyboard-shortcut {
+		font-size: var(--font-size-sm);
+		color: var(--text-tertiary);
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+	}
+
+	kbd {
+		padding: var(--space-1) var(--space-2);
+		background-color: var(--bg-secondary);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-sm);
+		font-size: var(--font-size-xs);
+		font-family: var(--font-family-mono);
+		color: var(--text-secondary);
+	}
+
+	.tips-section {
+		animation: fadeIn var(--transition-slow) ease-out 0.4s both;
+	}
+
+	.tip-card {
+		max-width: 400px;
+		margin: 0 auto;
+	}
+
+	.tip-title {
+		font-size: var(--font-size-lg);
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: var(--space-3);
+	}
+
+	.tip-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.tip-list li {
+		font-size: var(--font-size-sm);
+		color: var(--text-secondary);
+		line-height: var(--line-height-relaxed);
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.tip-list li::before {
+		content: '✓';
+		color: var(--color-success);
+		font-weight: bold;
+		flex-shrink: 0;
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.note-editor-container {
+			padding: var(--space-4) var(--space-2);
+		}
+
+		.editor-header {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-2);
+		}
+
+		.editor-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.keyboard-shortcut {
+			justify-content: center;
+		}
+
+		.note-textarea {
+			min-height: 300px;
+		}
 	}
 </style>
