@@ -25,7 +25,8 @@
 	let error = $state('');
 	const animations = getContext('animations');
 
-	async function handleConnect() {
+	async function handleConnect(event) {
+		event.preventDefault();
 		if (!apiKey.trim()) {
 			error = 'Please enter your Pinecone API key';
 			return;
