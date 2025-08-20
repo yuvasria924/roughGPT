@@ -1,0 +1,467 @@
+<script>
+  import { onMount } from 'svelte';
+  import Card from '$lib/components/Card.svelte';
+  import Button from '$lib/components/Button.svelte';
+  import TaskManager from '$lib/components/TaskManager.svelte';
+  import RichTextEditor from '$lib/components/RichTextEditor.svelte';
+
+  let activeTab = $state('tasks');
+  let noteContent = $state('');
+  let savedNotes = $state([]);
+
+  function switchTab(tab) {
+    activeTab = tab;
+  }
+
+  function saveNote() {
+    if (!noteContent.trim()) return;
+    
+    const note = {
+      id: Date.now().toString(),
+      content: noteContent,
+      createdAt: new Date(),
+      title: extractTitle(noteContent)
+    };
+    
+    savedNotes = [note, ...savedNotes];
+    noteContent = '';
+  }
+
+  function extractTitle(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const firstHeading = div.querySelector('h1, h2, h3');
+    if (firstHeading) {
+      return firstHeading.textContent;
+    }
+    const text = div.textContent || div.innerText || '';
+    return text.slice(0, 50) + (text.length > 50 ? '...' : '');
+  }
+
+  function deleteNote(noteId) {
+    savedNotes = savedNotes.filter(note => note.id !== noteId);
+  }
+
+  function loadNote(note) {
+    noteContent = note.content;
+    activeTab = 'editor';
+  }
+
+  onMount(() => {
+    // Load saved notes from localStorage
+    const saved = localStorage.getItem('productivity-notes');
+    if (saved) {
+      try {
+        savedNotes = JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to load saved notes:', e);
+      }
+    }
+  });
+
+  // Save notes to localStorage when they change
+  $effect(() => {
+    localStorage.setItem('productivity-notes', JSON.stringify(savedNotes));
+  });
+</script>
+
+<svelte:head>
+  <title>Productivity Dashboard - Rough App</title>
+  <meta name="description" content="Manage tasks and create rich text notes in your productivity dashboard" />
+</svelte:head>
+
+<main class="productivity-container">
+  <div class="productivity-header">
+    <h1 class="page-title">Productivity Dashboard</h1>
+    <p class="page-subtitle">Manage your tasks and create rich content notes</p>
+  </div>
+
+  <div class="tab-navigation">
+    <Card size="sm" customClass="tab-card">
+      <div class="tab-buttons">
+        <Button
+          variant={activeTab === 'tasks' ? 'primary' : 'ghost'}
+          size="md"
+          onclick={() => switchTab('tasks')}
+          customClass="tab-button"
+        >
+          📋 Task Management
+        </Button>
+        <Button
+          variant={activeTab === 'editor' ? 'primary' : 'ghost'}
+          size="md"
+          onclick={() => switchTab('editor')}
+          customClass="tab-button"
+        >
+          📝 Rich Text Editor
+        </Button>
+        <Button
+          variant={activeTab === 'notes' ? 'primary' : 'ghost'}
+          size="md"
+          onclick={() => switchTab('notes')}
+          customClass="tab-button"
+        >
+          📚 Saved Notes
+        </Button>
+      </div>
+    </Card>
+  </div>
+
+  <div class="tab-content">
+    {#if activeTab === 'tasks'}
+      <div class="tab-panel tasks-panel fade-in">
+        <TaskManager />
+      </div>
+    
+    {:else if activeTab === 'editor'}
+      <div class="tab-panel editor-panel fade-in">
+        <Card size="lg" variant="elevated" customClass="editor-container">
+          <div class="editor-header">
+            <h2 class="editor-title">Rich Text Editor</h2>
+            <div class="editor-actions">
+              <Button
+                variant="primary"
+                size="sm"
+                onclick={saveNote}
+                disabled={!noteContent.trim()}
+              >
+                Save Note
+              </Button>
+            </div>
+          </div>
+          
+          <RichTextEditor
+            bind:value={noteContent}
+            placeholder="Start writing your rich text note..."
+          />
+        </Card>
+      </div>
+    
+    {:else if activeTab === 'notes'}
+      <div class="tab-panel notes-panel fade-in">
+        <div class="notes-header">
+          <h2 class="notes-title">Saved Notes</h2>
+          <p class="notes-subtitle">
+            {savedNotes.length} note{savedNotes.length === 1 ? '' : 's'} saved
+          </p>
+        </div>
+
+        {#if savedNotes.length === 0}
+          <Card size="lg" customClass="empty-state">
+            <div class="empty-content">
+              <div class="empty-icon">📝</div>
+              <h3 class="empty-title">No notes yet</h3>
+              <p class="empty-description">
+                Create your first rich text note using the editor.
+              </p>
+              <Button
+                variant="primary"
+                onclick={() => switchTab('editor')}
+              >
+                Create Note
+              </Button>
+            </div>
+          </Card>
+        {:else}
+          <div class="notes-grid">
+            {#each savedNotes as note (note.id)}
+              <Card size="md" hoverable customClass="note-card">
+                <div class="note-preview">
+                  <h3 class="note-title">{note.title}</h3>
+                  <div class="note-content-preview">
+                    {@html note.content}
+                  </div>
+                  <div class="note-meta">
+                    <span class="note-date">
+                      {new Intl.DateTimeFormat('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }).format(new Date(note.createdAt))}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="note-actions">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onclick={() => loadNote(note)}
+                    title="Edit note"
+                  >
+                    ✏️ Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onclick={() => deleteNote(note.id)}
+                    title="Delete note"
+                  >
+                    🗑️ Delete
+                  </Button>
+                </div>
+              </Card>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {/if}
+  </div>
+</main>
+
+<style>
+  .productivity-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4);
+    min-height: 100vh;
+  }
+
+  .productivity-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+    animation: slideUp var(--transition-slow) ease-out;
+  }
+
+  .page-title {
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .tab-navigation {
+    margin-bottom: var(--space-8);
+    animation: scaleIn var(--transition-slow) ease-out 0.2s both;
+  }
+
+  .tab-card {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .tab-buttons {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    flex: 1;
+    min-width: 150px;
+    justify-content: center;
+  }
+
+  .tab-content {
+    animation: fadeIn var(--transition-slow) ease-out 0.4s both;
+  }
+
+  .tab-panel {
+    width: 100%;
+  }
+
+  .editor-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .editor-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .editor-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .notes-header {
+    text-align: center;
+    margin-bottom: var(--space-6);
+  }
+
+  .notes-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .notes-subtitle {
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+  }
+
+  .empty-state {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .empty-content {
+    text-align: center;
+    padding: var(--space-8);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.7;
+  }
+
+  .empty-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .empty-description {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-6);
+    line-height: var(--line-height-relaxed);
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--space-6);
+  }
+
+  .note-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+  }
+
+  .note-preview {
+    flex: 1;
+    margin-bottom: var(--space-4);
+  }
+
+  .note-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    line-height: var(--line-height-tight);
+  }
+
+  .note-content-preview {
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+    font-size: var(--font-size-sm);
+    max-height: 100px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: var(--space-3);
+  }
+
+  .note-content-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, var(--bg-primary));
+  }
+
+  .note-content-preview :global(h1),
+  .note-content-preview :global(h2),
+  .note-content-preview :global(h3) {
+    font-size: var(--font-size-sm);
+    margin: var(--space-1) 0;
+  }
+
+  .note-content-preview :global(p) {
+    margin: var(--space-1) 0;
+  }
+
+  .note-meta {
+    border-top: 1px solid var(--border-primary);
+    padding-top: var(--space-2);
+  }
+
+  .note-date {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    font-weight: 500;
+  }
+
+  .note-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-primary);
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .productivity-container {
+      padding: var(--space-4) var(--space-2);
+    }
+
+    .tab-buttons {
+      flex-direction: column;
+    }
+
+    .tab-button {
+      min-width: auto;
+    }
+
+    .editor-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .notes-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+
+    .note-actions {
+      justify-content: stretch;
+    }
+
+    .note-actions > :global(*) {
+      flex: 1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: var(--font-size-3xl);
+    }
+
+    .tab-button {
+      font-size: var(--font-size-sm);
+      padding: var(--space-2) var(--space-3);
+    }
+  }
+</style>
