@@ -1,13 +1,19 @@
 <script>
 	import { onMount } from 'svelte';
-	let loading = false;
-	let items = [];
-	let selectedNote = null;
-	let editorVisible = false;
-	let deleting = false;
+	import Card from '$lib/components/Card.svelte';
+	import Button from '$lib/components/Button.svelte';
+
+	let loading = $state(false);
+	let items = $state([]);
+	let selectedNote = $state(null);
+	let editorVisible = $state(false);
+	let deleting = $state(false);
 
 	function fetchNotes(query) {
+		if (!query?.trim()) return;
+		
 		loading = true;
+		
 		fetch('/search-note', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -15,8 +21,11 @@
 		})
 			.then((response) => response.json())
 			.then((result) => {
-				items = result.data;
-
+				items = result.data || [];
+			})
+			.catch((error) => {
+				console.error('Search failed:', error);
+				items = [];
 			})
 			.finally(() => {
 				loading = false;
@@ -38,12 +47,6 @@
 			window.removeEventListener('query-changed', handleQueryChange);
 		};
 	});
-	function getFadedBgStyle(index, total) {
-		const maxOpacity = 1;
-		const minOpacity = 0.2;
-		const bgOpacity = maxOpacity - (maxOpacity - minOpacity) * (index / (total - 1 || 1));
-		return `background-color: rgba(255, 255, 255, ${bgOpacity});`;
-	}
 
 	function openEditor(note) {
 		selectedNote = note;
@@ -56,234 +59,291 @@
 		selectedNote = null;
 		document.body.style.overflow = 'auto';
 	}
-  async function deleteNote() {
-    if (selectedNote) {
-		deleting = true;
-        try {
-            const response = await fetch('/delete-note', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    apiKey: localStorage.getItem('apiKey'),
-                    fullText: selectedNote // or selectedNote.text, depending on your note structure
-                })
-            });
 
-            const result = await response.json();
-
-            if (result.success) {
-                // Remove from UI
+	async function deleteNote() {
+		if (!selectedNote) return;
 		
-                items = items.filter(item => item !== selectedNote);
-                closeEditor();
+		deleting = true;
+		
+		try {
+			const response = await fetch('/delete-note', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					apiKey: localStorage.getItem('apiKey'),
+					fullText: selectedNote
+				})
+			});
 
-            } else {
-                alert('Failed to delete note: ' + (result.error || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Error deleting note:', error);
-            alert('Failed to delete note. Please try again.');
-        }
-		finally {
-            deleting = false;
-        }
-    }
-}
+			const result = await response.json();
 
+			if (result.success) {
+				items = items.filter(item => item !== selectedNote);
+				closeEditor();
+			} else {
+				alert('Failed to delete note: ' + (result.error || 'Unknown error'));
+			}
+		} catch (error) {
+			console.error('Error deleting note:', error);
+			alert('Failed to delete note. Please try again.');
+		} finally {
+			deleting = false;
+		}
+	}
+
+	function handleKeydown(event, note) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			openEditor(note);
+		}
+	}
+
+	function handleModalKeydown(event) {
+		if (event.key === 'Escape') {
+			closeEditor();
+		}
+	}
+
+	function truncateText(text, maxLength = 150) {
+		if (text.length <= maxLength) return text;
+		return text.slice(0, maxLength) + '...';
+	}
 </script>
 
+<svelte:window onkeydown={editorVisible ? handleModalKeydown : undefined} />
 
+<main class="search-container">
+	<div class="search-header">
+		<h1 class="page-title">Search Results</h1>
+		<p class="page-subtitle">
+			{#if loading}
+				Searching...
+			{:else if items.length === 0}
+				No notes found
+			{:else}
+				Found {items.length} note{items.length === 1 ? '' : 's'}
+			{/if}
+		</p>
+	</div>
 
-{#if loading}
-	<div class="loading-indicator">Loading...</div>
-{/if}
-
-<!-- Notes Display -->
-<div class="plates">
-    {#each items as item, index (item)}
-        <div
-            class="note"
-            style={getFadedBgStyle(index, items.length)}
-            on:click={() => openEditor(item)}
-            role="button"
-            tabindex="0"
-            on:keydown={(e) => e.key === 'Enter' && openEditor(item)}
-        >
-            {item}
-        </div>
-    {/each}
-</div>
-
-
-<!-- Editor Modal -->
-{#if editorVisible}
-	<div class="modal-wrapper">
-		<div
-			class="modal-backdrop"
-			on:click|self={closeEditor}
-			role="button"
-			tabindex="0"
-			on:keydown={(e) => e.key === 'Enter' && closeEditor()}
-			aria-label="Close editor"
-		></div>
-		<div class="note-editor">
-			<button class="delete-btn" on:click={deleteNote}>
-				Delete
-			</button>
-
-			{#if deleting}
-    <div class="delete-indicator">Deleting...</div>
-{/if} 
-
-			<textarea bind:value={selectedNote} class="editor-text"></textarea>
+	{#if loading}
+		<div class="loading-container">
+			<div class="loading-spinner"></div>
+			<p class="loading-text">Searching your notes...</p>
 		</div>
+	{:else if items.length === 0}
+		<Card size="lg" customClass="empty-state">
+			<div class="empty-state-content">
+				<div class="empty-state-icon">🔍</div>
+				<h3 class="empty-state-title">No notes found</h3>
+				<p class="empty-state-description">
+					Try adjusting your search terms or create a new note to get started.
+				</p>
+			</div>
+		</Card>
+	{:else}
+		<div class="notes-grid">
+			{#each items as item, index (item)}
+				<Card
+					size="md"
+					hoverable
+					clickable
+					customClass="note-card fade-in"
+					onclick={() => openEditor(item)}
+					style="animation-delay: {index * 0.1}s"
+					role="button"
+					tabindex="0"
+					onkeydown={(e) => handleKeydown(e, item)}
+					aria-label="Open note: {truncateText(item, 50)}"
+				>
+					<div class="note-content">
+						<p class="note-text">{truncateText(item)}</p>
+					</div>
+					<div class="note-footer">
+						<span class="note-length">{item.length} characters</span>
+					</div>
+				</Card>
+			{/each}
+		</div>
+	{/if}
+</main>
+
+<!-- Note Editor Modal -->
+{#if editorVisible}
+	<div class="modal-overlay" transition:fade={{ duration: 200 }}>
+		<div class="modal-backdrop" onclick={closeEditor}></div>
+		<Card size="lg" variant="elevated" customClass="note-editor-modal scale-in">
+			<div class="modal-header">
+				<h2 class="modal-title">Edit Note</h2>
+				<div class="modal-actions">
+					<Button 
+						variant="danger" 
+						size="sm" 
+						loading={deleting}
+						onclick={deleteNote}
+						disabled={deleting}
+					>
+						{deleting ? 'Deleting...' : 'Delete'}
+					</Button>
+					<Button variant="ghost" size="sm" onclick={closeEditor}>
+						Close
+					</Button>
+				</div>
+			</div>
+
+			<div class="editor-wrapper">
+				<textarea
+					bind:value={selectedNote}
+					class="note-editor-textarea"
+					placeholder="Edit your note..."
+					rows="15"
+				></textarea>
+			</div>
+
+			<div class="modal-footer">
+				<p class="editor-hint">
+					<kbd>Esc</kbd> to close • Changes are not saved automatically
+				</p>
+			</div>
+		</Card>
 	</div>
 {/if}
 
-
 <style>
-	@property --angle {
-		syntax: '<angle>';
-		initial-value: 0deg;
-		inherits: false;
+	.search-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: var(--space-8) var(--space-4);
+		min-height: 100vh;
 	}
 
-	@keyframes gradientAnimation {
-		0% {
-			background-position: 0% 50%;
-		}
-		50% {
-			background-position: 100% 50%;
-		}
-		100% {
-			background-position: 0% 50%;
-		}
-	}
-	@keyframes rotateGradient {
-		from {
-			--angle: 0deg;
-		}
-		to {
-			--angle: 360deg;
-		}
-	}
-
-	.loading-indicator {
-		margin: 2rem;
+	.search-header {
 		text-align: center;
-		font-size: 1.2rem;
-		font-weight: bold;
-		color: #555;
-		animation: pulse 1.5s infinite ease-in-out;
+		margin-bottom: var(--space-8);
+		animation: slideUp var(--transition-slow) ease-out;
 	}
 
-	.delete-indicator {
-		  position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #555;
-    animation: pulse 1.5s infinite ease-in-out;
-    background: rgba(255,255,255,0.9); /* Optional: adds a white overlay */
-    padding: 1.5rem 2.5rem;
-    border-radius: 1rem;
-    z-index: 20;
-}
-
-	@keyframes pulse {
-		0% {
-			opacity: 0.3;
-		}
-		50% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0.3;
-		}
+	.page-title {
+		font-size: var(--font-size-4xl);
+		font-weight: 700;
+		color: var(--text-primary);
+		margin-bottom: var(--space-2);
 	}
 
-	.plates {
-		width: 90vw;
-		height: 55vh;
+	.page-subtitle {
+		font-size: var(--font-size-lg);
+		color: var(--text-secondary);
+		line-height: var(--line-height-relaxed);
+	}
+
+	.loading-container {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		justify-content: flex-start;
-		border-radius: 1rem;
-		background: transparent;
-		overflow-y: auto; /* or scroll, depending on layout */
-		scrollbar-width: thin; /* Firefox */
-		scrollbar-color: white transparent; /* Firefox */
+		justify-content: center;
+		padding: var(--space-16);
+		animation: fadeIn var(--transition-base) ease-out;
 	}
 
-	/* WebKit (Chrome, Edge, Opera, Safari) */
-	.plates::-webkit-scrollbar {
-		width: 8px;
+	.loading-spinner {
+		width: 3rem;
+		height: 3rem;
+		border: 3px solid var(--border-primary);
+		border-top: 3px solid var(--color-primary);
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-bottom: var(--space-4);
 	}
 
-	.plates::-webkit-scrollbar-track {
-		background: transparent;
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
-	.plates::-webkit-scrollbar-thumb {
-		background-color: white;
-		border-radius: 4px;
+	.loading-text {
+		color: var(--text-secondary);
+		font-size: var(--font-size-lg);
 	}
 
-	.note {
-		background-color: white;
-		margin: 1rem;
-		padding: 1rem;
-		border-radius: 1rem;
-		min-width: 10rem;
-		width: 10rem;
-		height: 10rem;
-		border: 2px solid rgb(0, 0, 0);
-		overflow: auto;
-		scrollbar-width: thin; /* Firefox */
-		scrollbar-color: black transparent; /* Firefox */
-		transition:
-			opacity 0.3s ease,
-			transform 0.3s ease;
+	.empty-state {
+		width: 100%;
+		max-width: 500px;
+		margin: 0 auto;
+		animation: scaleIn var(--transition-slow) ease-out;
 	}
-	.note:hover {
-		transform: scale(1.05);
+
+	.empty-state-content {
+		text-align: center;
+		padding: var(--space-8);
+	}
+
+	.empty-state-icon {
+		font-size: 4rem;
+		margin-bottom: var(--space-4);
+		opacity: 0.7;
+	}
+
+	.empty-state-title {
+		font-size: var(--font-size-2xl);
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: var(--space-3);
+	}
+
+	.empty-state-description {
+		font-size: var(--font-size-base);
+		color: var(--text-secondary);
+		line-height: var(--line-height-relaxed);
+	}
+
+	.notes-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: var(--space-6);
+		animation: fadeIn var(--transition-slow) ease-out 0.2s both;
+	}
+
+	.note-card {
+		min-height: 200px;
+		display: flex;
+		flex-direction: column;
 		cursor: pointer;
+		transition: all var(--transition-base);
 	}
 
-	/* WebKit (Chrome, Edge, Opera, Safari) */
-	.note::-webkit-scrollbar {
-		width: 8px;
+	.note-card:focus {
+		outline: 2px solid var(--border-focus);
+		outline-offset: 2px;
 	}
 
-	.note::-webkit-scrollbar-track {
-		background: transparent;
+	.note-content {
+		flex: 1;
+		margin-bottom: var(--space-4);
 	}
 
-	.note::-webkit-scrollbar-thumb {
-		background-color: black;
-		border-radius: 4px;
+	.note-text {
+		color: var(--text-primary);
+		line-height: var(--line-height-relaxed);
+		font-size: var(--font-size-base);
+		margin: 0;
+		word-break: break-word;
 	}
 
-	:global(body.dark-mode) .note {
-		background-color: #778fdd;
-		color: #000000;
-		border: 2px solid #778fdd;
-		transition:
-			background-color 0.3s,
-			color 0.3s;
-		scrollbar-color: #778fdd transparent; /* Firefox */
+	.note-footer {
+		border-top: 1px solid var(--border-primary);
+		padding-top: var(--space-3);
+		margin-top: auto;
 	}
 
-	:global(body.dark-mode) .note::-webkit-scrollbar-thumb {
-		background-color: #778fdd;
+	.note-length {
+		font-size: var(--font-size-xs);
+		color: var(--text-tertiary);
+		font-weight: 500;
 	}
 
-	/* Modal Container */
-	.modal-wrapper {
+	/* Modal Styles */
+	.modal-overlay {
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -292,87 +352,136 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		z-index: 999;
+		z-index: 50;
+		padding: var(--space-4);
 	}
 
-	/* Backdrop */
 	.modal-backdrop {
 		position: absolute;
 		top: 0;
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(0, 0, 0, 0.6);
+		background-color: var(--bg-overlay);
+		backdrop-filter: blur(4px);
 	}
 
-	/* Modal Content */
-	.note-editor {
-		display: flex;
-		flex-direction: column; /* Add this line */
-        align-items: center;    /* Add this line */
-		justify-content: center;
+	.note-editor-modal {
 		position: relative;
-		background: white;
-		margin: 1rem;
-		padding: 1.5rem;
-		border-radius: 1rem;
-		width: 90vw;
+		width: 100%;
 		max-width: 800px;
 		max-height: 90vh;
 		overflow-y: auto;
-		overflow-x: hidden; /* Add this to enforce no horizontal scroll */
-		box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-		z-index: 1000;
+		z-index: 51;
 	}
 
-	:global(body.dark-mode) .note-editor {
-		background: #778fdd;
+	.modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--space-6);
+		flex-wrap: wrap;
+		gap: var(--space-4);
 	}
 
-	.editor-text {
-		height: 700px;
-		width: 96%;
-		background: transparent;
-		max-width: 96%;
-		max-height: 60vh;
-		min-height: 60vh;
-		min-width: 96%;
-		padding: 1rem;
-		font-size: 0.9rem;
-		line-height: 1.5;
-		border-radius: 0.5rem;
+	.modal-title {
+		font-size: var(--font-size-2xl);
+		font-weight: 600;
+		color: var(--text-primary);
+		margin: 0;
+	}
 
-		overflow-y: auto;
-		overflow-x: hidden;
+	.modal-actions {
+		display: flex;
+		gap: var(--space-2);
+	}
 
-		/* Force text to wrap properly */
-		white-space: pre-wrap;
-		word-wrap: break-word;
-		overflow-wrap: break-word;
+	.editor-wrapper {
+		margin-bottom: var(--space-6);
+	}
 
-		border: none;
+	.note-editor-textarea {
+		width: 100%;
+		min-height: 400px;
+		padding: var(--space-4);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-lg);
+		background-color: var(--bg-primary);
+		color: var(--text-primary);
+		font-size: var(--font-size-base);
+		line-height: var(--line-height-relaxed);
+		font-family: var(--font-family-sans);
+		resize: vertical;
+		transition: all var(--transition-base);
 		outline: none;
-		resize: none;
-	}
-	.editor-text::-webkit-scrollbar {
-		display: none; /* Chrome, Safari */
 	}
 
-	.delete-btn {
-		position: absolute;
-	top: 10px;
-	right: 15px;
-	background-color: #ff4d4d;
-	color: white;
-	border: none;
-	border-radius: 4px;
-	padding: 5px 10px;
-	font-size: 10px;
-	cursor: pointer;
-	z-index: 10;
-}
-.delete-btn:hover {
-	background-color: #e60000;
-}
+	.note-editor-textarea:focus {
+		border-color: var(--border-focus);
+		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+	}
 
+	.note-editor-textarea::placeholder {
+		color: var(--text-tertiary);
+	}
+
+	.modal-footer {
+		border-top: 1px solid var(--border-primary);
+		padding-top: var(--space-4);
+	}
+
+	.editor-hint {
+		font-size: var(--font-size-sm);
+		color: var(--text-tertiary);
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	kbd {
+		padding: var(--space-1) var(--space-2);
+		background-color: var(--bg-secondary);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-sm);
+		font-size: var(--font-size-xs);
+		font-family: var(--font-family-mono);
+		color: var(--text-secondary);
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.search-container {
+			padding: var(--space-4) var(--space-2);
+		}
+
+		.notes-grid {
+			grid-template-columns: 1fr;
+			gap: var(--space-4);
+		}
+
+		.modal-header {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.modal-actions {
+			width: 100%;
+			justify-content: flex-end;
+		}
+
+		.note-editor-textarea {
+			min-height: 300px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.modal-actions {
+			justify-content: stretch;
+		}
+
+		.modal-actions > :global(*) {
+			flex: 1;
+		}
+	}
 </style>
