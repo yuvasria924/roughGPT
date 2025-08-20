@@ -489,8 +489,16 @@
     }
 
     .note-actions > :global(*) {
-      flex: 1;
-    }
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .action-icon {
+    width: 1rem;
+    height: 1rem;
+  }
   }
 
   @media (max-width: 480px) {
