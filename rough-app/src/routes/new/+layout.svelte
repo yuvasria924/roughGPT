@@ -58,16 +58,28 @@
 		<Card size="sm" variant="elevated" customClass="nav-card">
 			<div class="nav-content">
 				<div class="nav-left">
-					<Button 
-						variant="ghost" 
-						size="sm" 
+					<Button
+						variant="ghost"
+						size="sm"
 						onclick={handleNewNote}
-						customClass="new-note-btn"
+						customClass="nav-btn"
 					>
 						<svg class="icon" viewBox="0 0 20 20" fill="currentColor">
 							<path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
 						</svg>
 						New Note
+					</Button>
+
+					<Button
+						variant="ghost"
+						size="sm"
+						onclick={() => goto('/new/productivity')}
+						customClass="nav-btn"
+					>
+						<svg class="icon" viewBox="0 0 20 20" fill="currentColor">
+							<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						Productivity
 					</Button>
 				</div>
 
@@ -152,9 +164,11 @@
 
 	.nav-left {
 		flex-shrink: 0;
+		display: flex;
+		gap: var(--space-2);
 	}
 
-	.new-note-btn {
+	.nav-btn {
 		display: flex;
 		align-items: center;
 		gap: var(--space-2);
