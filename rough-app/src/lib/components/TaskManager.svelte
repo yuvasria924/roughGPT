@@ -499,6 +499,9 @@
     font-size: var(--font-size-xs);
     color: var(--text-tertiary);
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
   }
 
   .task-due-date.overdue {
