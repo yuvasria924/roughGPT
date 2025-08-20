@@ -506,6 +506,18 @@
     font-weight: 600;
   }
 
+  .date-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+    display: inline;
+    margin-right: var(--space-1);
+  }
+
+  .delete-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
   .task-actions {
     display: flex;
     justify-content: flex-end;
