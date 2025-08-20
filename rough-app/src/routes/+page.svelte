@@ -2,200 +2,320 @@
 	import { onMount } from 'svelte';
 	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
+	import Card from '$lib/components/Card.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import Input from '$lib/components/Input.svelte';
 
 	/** @type {import('./$types').PageProps} */
 	let { data } = $props();
 	let apiKey = $state('');
 	let cloud = $state('aws');
 	let region = $state('us-east-1');
-	let landingPage = $state(true);
+	let isConnecting = $state(false);
+	let error = $state('');
 	const animations = getContext('animations');
-	/**
-	 * @type {(HTMLSpanElement | undefined)[]}
-	 */
-	var ripples = [];
 
-	async function createIndex() {
-		const response = await fetch('/create-index', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ apiKey, cloud, region })
-		});
+	async function handleConnect() {
+		if (!apiKey.trim()) {
+			error = 'Please enter your Pinecone API key';
+			return;
+		}
 
-		const result = await response.json();
-		if (result.error) {
-			alert(result.error);
-		} else {
-			localStorage.setItem('apiKey', apiKey);
-			animations.connectAnimation();
-			goto('/new');
-			landingPage = false;
-			for (let index = 0; index < ripples.length; index++) {
-				ripples[index]?.remove();
+		isConnecting = true;
+		error = '';
+
+		try {
+			const response = await fetch('/create-index', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ apiKey, cloud, region })
+			});
+
+			const result = await response.json();
+			if (result.error) {
+				error = result.error;
+			} else {
+				localStorage.setItem('apiKey', apiKey);
+				animations.connectAnimation();
+				await new Promise(resolve => setTimeout(resolve, 500));
+				goto('/new');
 			}
+		} catch (err) {
+			error = 'Failed to connect. Please check your credentials and try again.';
+		} finally {
+			isConnecting = false;
 		}
 	}
 
-	/**
-	 * @param {number} [x]
-	 * @param {number} [y]
-	 */
-	function createRipple(x, y) {
-		if (landingPage) {
-			const ripple = document.createElement('span');
-			ripple.classList.add('ripple');
-
-			ripple.style.width = `${x == 0 ? 855 : 186}px`;
-			ripple.style.height = `${x == 0 ? 855 : 186}px`;
-
-			ripple.style.left = `${x}%`;
-			ripple.style.top = `${y}%`;
-
-			document.body.appendChild(ripple);
-			return ripple;
+	function handleKeyPress(event) {
+		if (event.key === 'Enter' && !isConnecting) {
+			handleConnect();
 		}
 	}
 
 	onMount(() => {
-		if (localStorage.getItem('apiKey')) goto('/new');
-		else {
-			document.getElementById('pcKey')?.addEventListener('keypress', async (ev) => {
-				if (ev.code == 'Enter') await createIndex();
-			});
-
-			ripples.push(createRipple(0, 0));
-			new Promise((r) => setTimeout(r, 1500)).then(() => {
-				ripples.push(createRipple(7.5, 7.5));
-			});
+		if (localStorage.getItem('apiKey')) {
+			goto('/new');
 		}
 	});
 </script>
 
-<div class="div1">
-	<h1>{data.title}</h1>
-	<input
-		id="pcKey"
-		type="text"
-		placeholder="Enter Pinecone API Key"
-		maxlength="200"
-		bind:value={apiKey}
-	/>
-	<input id="cloud" type="text" placeholder="Cloud" maxlength="50" bind:value={cloud} />
-	<input id="region" type="text" placeholder="Region" maxlength="50" bind:value={region} />
-	<button class="connect-button" onclick={createIndex}>Connect</button>
-</div>
+<main class="main-container">
+	<div class="hero-section">
+		<div class="hero-content">
+			<h1 class="hero-title">{data.title}</h1>
+			<p class="hero-description">
+				Connect to your Pinecone database and start managing your vector data with ease.
+			</p>
+		</div>
+	</div>
+
+	<Card size="lg" variant="elevated" customClass="connection-card">
+		<div class="card-header">
+			<h2 class="card-title">Database Connection</h2>
+			<p class="card-subtitle">Enter your Pinecone credentials to get started</p>
+		</div>
+
+		<form class="connection-form" onsubmit|preventDefault={handleConnect}>
+			<Input
+				label="Pinecone API Key"
+				type="password"
+				placeholder="sk-..."
+				bind:value={apiKey}
+				error={error && !apiKey.trim() ? 'API key is required' : ''}
+				required
+				fullWidth
+				onkeypress={handleKeyPress}
+				disabled={isConnecting}
+			/>
+
+			<div class="form-row">
+				<Input
+					label="Cloud Provider"
+					type="text"
+					placeholder="aws"
+					bind:value={cloud}
+					disabled={isConnecting}
+					hint="e.g., aws, gcp, azure"
+				/>
+
+				<Input
+					label="Region"
+					type="text"
+					placeholder="us-east-1"
+					bind:value={region}
+					disabled={isConnecting}
+					hint="e.g., us-east-1, eu-west-1"
+				/>
+			</div>
+
+			{#if error}
+				<div class="error-message" role="alert">
+					<svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
+						<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zM9.25 14a.75.75 0 011.5 0v.01a.75.75 0 01-1.5 0V14z" clip-rule="evenodd" />
+					</svg>
+					{error}
+				</div>
+			{/if}
+
+			<Button
+				type="submit"
+				variant="primary"
+				size="lg"
+				loading={isConnecting}
+				fullWidth
+			>
+				{#if isConnecting}
+					Connecting...
+				{:else}
+					Connect to Pinecone
+				{/if}
+			</Button>
+		</form>
+	</Card>
+
+	<div class="features-grid">
+		<Card size="md" hoverable customClass="feature-card">
+			<div class="feature-icon">🔍</div>
+			<h3 class="feature-title">Vector Search</h3>
+			<p class="feature-description">Perform semantic searches across your vector data with ease.</p>
+		</Card>
+
+		<Card size="md" hoverable customClass="feature-card">
+			<div class="feature-icon">📝</div>
+			<h3 class="feature-title">Note Management</h3>
+			<p class="feature-description">Create, edit, and organize your notes with powerful indexing.</p>
+		</Card>
+
+		<Card size="md" hoverable customClass="feature-card">
+			<div class="feature-icon">⚡</div>
+			<h3 class="feature-title">Real-time Sync</h3>
+			<p class="feature-description">Keep your data synchronized across all your devices.</p>
+		</Card>
+	</div>
+</main>
 
 <style>
-	/* Parent container */
-	.div1 {
-		width: 80vw;
-		max-width: 600px; /* Prevent excessive stretching on wide screens */
-		padding: 5%;
+	.main-container {
+		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
-		margin-top: 3.6vh;
-		margin-bottom: auto;
-		justify-content: center;
 		align-items: center;
-		border-radius: 10px;
+		padding: var(--space-8) var(--space-4);
+		gap: var(--space-12);
+		max-width: 1200px;
+		margin: 0 auto;
 	}
 
-	/* Title */
-	:global(body) h1 {
-		font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-		margin-bottom: 5%;
-		font-size: clamp(2rem, 5vw, 8rem); /* Responsive text size */
-		color: #000;
+	.hero-section {
 		text-align: center;
-		transition: color 0.3s;
+		max-width: 600px;
+		margin-top: var(--space-16);
 	}
 
-	:global(body.dark-mode) h1 {
-		color: #fff;
-		transition: color 0.3s;
+	.hero-content {
+		animation: slideUp var(--transition-slow) ease-out;
 	}
 
-	/* Input field */
-	:global(body) input {
-		padding: 1rem;
-		width: 80%;
-		font-size: 1.5rem;
-		border: 2px solid black;
-		border-radius: 8px;
+	.hero-title {
+		font-size: clamp(2.5rem, 8vw, 4rem);
+		font-weight: 700;
+		color: var(--text-primary);
+		margin-bottom: var(--space-4);
+		line-height: 1.1;
+		background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.hero-description {
+		font-size: var(--font-size-lg);
+		color: var(--text-secondary);
+		line-height: var(--line-height-relaxed);
+		margin-bottom: var(--space-8);
+	}
+
+	.connection-card {
+		width: 100%;
+		max-width: 500px;
+		animation: scaleIn var(--transition-slow) ease-out 0.2s both;
+	}
+
+	.card-header {
 		text-align: center;
-		font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-		margin-bottom: 5%;
+		margin-bottom: var(--space-6);
 	}
 
-	/* Button */
-	:global(body) .connect-button {
-		background-color: black;
-		color: #d3b251;
-		font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-		padding: 1rem 2rem;
-		border-radius: 8px;
-		font-size: 1.5rem;
-		border: 2px solid white;
-		cursor: pointer;
-		transition:
-			background-color 0.3s,
-			color 0.3s;
+	.card-title {
+		font-size: var(--font-size-2xl);
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: var(--space-2);
 	}
 
-	:global(body.dark-mode) .connect-button {
-		background-color: #778fdd;
-		color: black;
-		transition:
-			background-color 0.3s,
-			color 0.3s;
+	.card-subtitle {
+		color: var(--text-secondary);
+		font-size: var(--font-size-base);
 	}
 
-	/* Centering body */
-	:global(body) {
+	.connection-form {
 		display: flex;
-		justify-content: center;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-4);
+	}
+
+	.error-message {
+		display: flex;
 		align-items: center;
-		height: 100vh;
-		margin: 0;
+		gap: var(--space-2);
+		padding: var(--space-3) var(--space-4);
+		background-color: #fef2f2;
+		border: 1px solid #fecaca;
+		border-radius: var(--radius-md);
+		color: var(--color-error);
+		font-size: var(--font-size-sm);
+		animation: slideUp var(--transition-base) ease-out;
 	}
-	@keyframes ripple-effect {
-		to {
-			transform: scale(0.33);
+
+	[data-theme="dark"] .error-message {
+		background-color: rgba(239, 68, 68, 0.1);
+		border-color: rgba(239, 68, 68, 0.3);
+	}
+
+	.error-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+		flex-shrink: 0;
+	}
+
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: var(--space-6);
+		width: 100%;
+		max-width: 800px;
+		animation: fadeIn var(--transition-slow) ease-out 0.4s both;
+	}
+
+	.feature-card {
+		text-align: center;
+		transition: transform var(--transition-base);
+	}
+
+	.feature-icon {
+		font-size: 2.5rem;
+		margin-bottom: var(--space-3);
+		display: block;
+	}
+
+	.feature-title {
+		font-size: var(--font-size-lg);
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: var(--space-2);
+	}
+
+	.feature-description {
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+		line-height: var(--line-height-relaxed);
+	}
+
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.main-container {
+			padding: var(--space-4) var(--space-2);
+			gap: var(--space-8);
+		}
+
+		.hero-section {
+			margin-top: var(--space-8);
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+
+		.features-grid {
+			grid-template-columns: 1fr;
+			gap: var(--space-4);
 		}
 	}
 
-	@keyframes rotate-forever {
-		from {
-			transform: rotate(0deg) scale(0.33);
+	@media (max-width: 480px) {
+		.hero-title {
+			font-size: 2rem;
 		}
-		to {
-			transform: rotate(360deg) scale(0.33);
-		}
-	}
 
-	:global(.ripple) {
-		position: fixed;
-		width: 20px;
-		height: 20px;
-		z-index: -1;
-		background: rgba(26, 24, 24, 0);
-		border: 1.5vw dashed #a38221;
-		border-radius: 50%;
-		transform: scale(0);
-		animation:
-			ripple-effect 1.5s linear forwards,
-			rotate-forever 5s linear infinite 1.5s;
-	}
-
-	:global(body.dark-mode) :global(.ripple) {
-		border: 1.5vw dashed #778fdd;
-	}
-
-	/* Responsive design for smaller resolutions */
-	@media (max-height: 768px) {
-		.div1 {
-			margin-top: 0vh;
-			padding: 2%;
+		.hero-description {
+			font-size: var(--font-size-base);
 		}
 	}
 </style>
