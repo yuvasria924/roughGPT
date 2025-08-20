@@ -2,10 +2,12 @@
 	import { onMount } from 'svelte';
 	import { setContext } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { applyTheme } from '$lib/stores/theme.js';
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import '$lib/styles/global.css';
 
 	let { children } = $props();
 
-	let darkModeToggleSrc = $state('/sun.svg'); // Default icon
 	/**
 	 * @type {HTMLImageElement}
 	 */
@@ -17,143 +19,132 @@
 
 	function logout() {
 		goto('/');
-		plug.classList.remove('connected');
-		socket.classList.remove('connected');
+		if (plug && socket) {
+			plug.classList.remove('connected');
+			socket.classList.remove('connected');
+		}
 		localStorage.removeItem('apiKey');
 	}
 
-	function toggle() {
-		const body = window.document.body;
-		body.classList.toggle('dark-mode');
-
-		// Change icon when toggled
-		darkModeToggleSrc = body.classList.contains('dark-mode') ? '/moon.svg' : '/sun.svg';
-	}
-
 	function connectAnimation() {
-		// Ensure plug exists before modifying it
-		if (plug) {
+		if (plug && socket) {
 			plug.classList.add('connected');
 			socket.classList.add('connected');
 		}
 	}
 
 	setContext('animations', { connectAnimation });
+
 	onMount(() => {
-		toggle();
-		toggle();
-		document.getElementById('dark-mode-toggle')?.addEventListener('click', toggle);
-		plug.addEventListener('click', logout);
-		socket.addEventListener('click', logout);
+		// Initialize theme
+		applyTheme('system');
+
+		// Setup logout handlers
+		if (plug) plug.addEventListener('click', logout);
+		if (socket) socket.addEventListener('click', logout);
+
+		// Auto-connect if API key exists
 		if (localStorage.getItem('apiKey')) {
 			connectAnimation();
 		}
 	});
 </script>
 
-<img
-	id="dark-mode-toggle"
-	class="dark-mode-toggle"
-	src={darkModeToggleSrc}
-	alt="Toggle Dark Mode"
-/>
+<div class="theme-toggle-container">
+	<ThemeToggle size="md" />
+</div>
 
-<img bind:this={plug} class="plug" src="/plug.svg" alt="plug" />
-<img bind:this={socket} class="socket" src="/socket.svg" alt="socket" />
+<div class="connection-indicators">
+	<img bind:this={plug} class="plug" src="/plug.svg" alt="Disconnect" />
+	<img bind:this={socket} class="socket" src="/socket.svg" alt="Disconnect" />
+</div>
 
 {@render children()}
 
 <style>
-	:global(body) .plug {
+	.theme-toggle-container {
+		position: fixed;
+		top: var(--space-4);
+		right: var(--space-4);
+		z-index: 50;
+	}
+
+	.connection-indicators {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 10;
+		pointer-events: none;
+	}
+
+	.plug {
 		width: 52vw;
 		height: auto;
-		position: fixed;
+		position: absolute;
 		left: -8%;
 		bottom: 2.95vw;
 		filter: none;
-		cursor:pointer;
-		transition:
-			filter 0.3s,
-			left 0.33s;
+		cursor: pointer;
+		pointer-events: auto;
+		transition: all var(--transition-slow);
+		opacity: 0.7;
 	}
 
-	:global(body.dark-mode) .plug {
+	.plug:hover {
+		opacity: 1;
+		transform: scale(1.02);
+	}
+
+	[data-theme="dark"] .plug {
 		filter: invert(1);
-		transition:
-			filter 0.3s,
-			left 0.33s;
 	}
 
-	:global(body) :global(.plug.connected) {
+	.plug.connected {
 		left: 0%;
-		transition: left 0.33s;
+		opacity: 1;
 	}
 
-	:global(body) {
-		background-color: #d3b251;
-		transition: background-color 0.3s;
-	}
-
-	:global(body.dark-mode) {
-		background-color: black;
-		transition: background-color 0.3s;
-	}
-
-	:global(body) .socket {
+	.socket {
 		width: 50vw;
 		height: auto;
 		bottom: 2.15vw;
-		position: fixed;
+		position: absolute;
 		right: -10%;
 		filter: none;
-		cursor:pointer;
-		transition:
-			filter 0.3s,
-			right 0.33s;
-	}
-
-	:global(body.dark-mode) .socket {
-		filter: invert(1);
-		transition:
-			filter 0.3s,
-			right 0.33s;
-	}
-
-	:global(body) :global(.socket.connected) {
-		right: 0%;
-		transition: right 0.33s;
-	}
-
-	.dark-mode-toggle {
-		position: fixed;
-		right: 4%;
-		top: 4.5%;
 		cursor: pointer;
-		width: 4vw;
-		height: auto;
-	}
-	/*  Highlight effect on hover */
-	.dark-mode-toggle:hover {
-		filter: brightness(1.2); /* Slight highlight effect */
-		transform: scale(1.1); /* Slight zoom effect */
-		transition: 0.2s ease-in-out; /* Smooth animation */
+		pointer-events: auto;
+		transition: all var(--transition-slow);
+		opacity: 0.7;
 	}
 
-	/*  Make the moon icon white when dark mode is active */
-	:global(body.dark-mode) .dark-mode-toggle {
-		filter: invert(1) brightness(2);
+	.socket:hover {
+		opacity: 1;
+		transform: scale(1.02);
 	}
 
-	/* Responsive design for smaller screens */
+	[data-theme="dark"] .socket {
+		filter: invert(1);
+	}
+
+	.socket.connected {
+		right: 0%;
+		opacity: 1;
+	}
+
+	/* Responsive adjustments */
 	@media (max-width: 768px) {
-		:global(body) :global(.plug.connected) {
+		.plug.connected {
 			left: -0.1%;
-			transition: left 0.33s;
 		}
 
-		:global(body) :global(.socket.connected) {
+		.socket.connected {
 			right: -0.1%;
-			transition: right 0.33s;
+		}
+
+		.theme-toggle-container {
+			top: var(--space-2);
+			right: var(--space-2);
 		}
 	}
 </style>
