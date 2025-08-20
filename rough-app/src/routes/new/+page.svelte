@@ -316,6 +316,15 @@
 		font-weight: 600;
 		color: var(--text-primary);
 		margin-bottom: var(--space-3);
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.tip-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+		color: var(--color-accent);
 	}
 
 	.tip-list {
