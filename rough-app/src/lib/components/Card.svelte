@@ -35,7 +35,7 @@
   onclick={onclick}
   {...props}
   role={clickable ? 'button' : undefined}
-  tabindex={clickable ? 0 : undefined}
+  tabindex={clickable ? 0 : -1}
 >
   {@render children()}
 </div>
