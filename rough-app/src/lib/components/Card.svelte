@@ -32,7 +32,9 @@
   let { children, onclick, ...props } = $props();
 
   $effect(() => {
-    if (onclick) clickable = true;
+    if (onclick) {
+      clickable = true;
+    }
   });
 </script>
 
