@@ -1,3 +1,13 @@
+<svelte:head>
+	<title>Rough-Man - Vector Database Management</title>
+	<meta name="description" content="Connect to your Pinecone database and manage vector data with ease. Modern, fast, and intuitive interface for vector search and note management." />
+	<meta name="keywords" content="pinecone, vector database, AI, machine learning, semantic search, notes" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta property="og:title" content="Rough-Man - Vector Database Management" />
+	<meta property="og:description" content="Modern interface for Pinecone vector database management" />
+	<meta property="og:type" content="website" />
+</svelte:head>
+
 <script>
 	import { onMount } from 'svelte';
 	import { getContext } from 'svelte';
