@@ -346,10 +346,26 @@
 	}
 
 	.tip-list li::before {
-		content: '✓';
-		color: var(--color-success);
-		font-weight: bold;
+		content: '';
+		width: 1rem;
+		height: 1rem;
+		background-color: var(--color-success);
+		border-radius: 50%;
 		flex-shrink: 0;
+		position: relative;
+	}
+
+	.tip-list li::after {
+		content: '';
+		position: absolute;
+		left: 0.25rem;
+		top: 0.125rem;
+		width: 0.25rem;
+		height: 0.5rem;
+		border: 2px solid white;
+		border-left: none;
+		border-top: none;
+		transform: rotate(45deg);
 	}
 
 	/* Responsive design */
