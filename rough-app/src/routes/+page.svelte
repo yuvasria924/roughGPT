@@ -86,7 +86,7 @@
 			<p class="card-subtitle">Enter your Pinecone credentials to get started</p>
 		</div>
 
-		<form class="connection-form" onsubmit|preventDefault={handleConnect}>
+		<form class="connection-form" onsubmit={handleConnect}>
 			<Input
 				label="Pinecone API Key"
 				type="password"
@@ -146,19 +146,31 @@
 
 	<div class="features-grid">
 		<Card size="md" hoverable customClass="feature-card">
-			<div class="feature-icon">🔍</div>
+			<div class="feature-icon">
+				<svg viewBox="0 0 24 24" fill="currentColor" class="feature-svg">
+					<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke="currentColor" stroke-width="2" fill="none" />
+				</svg>
+			</div>
 			<h3 class="feature-title">Vector Search</h3>
 			<p class="feature-description">Perform semantic searches across your vector data with ease.</p>
 		</Card>
 
 		<Card size="md" hoverable customClass="feature-card">
-			<div class="feature-icon">📝</div>
+			<div class="feature-icon">
+				<svg viewBox="0 0 24 24" fill="currentColor" class="feature-svg">
+					<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+				</svg>
+			</div>
 			<h3 class="feature-title">Note Management</h3>
 			<p class="feature-description">Create, edit, and organize your notes with powerful indexing.</p>
 		</Card>
 
 		<Card size="md" hoverable customClass="feature-card">
-			<div class="feature-icon">⚡</div>
+			<div class="feature-icon">
+				<svg viewBox="0 0 24 24" fill="currentColor" class="feature-svg">
+					<path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+				</svg>
+			</div>
 			<h3 class="feature-title">Real-time Sync</h3>
 			<p class="feature-description">Keep your data synchronized across all your devices.</p>
 		</Card>
