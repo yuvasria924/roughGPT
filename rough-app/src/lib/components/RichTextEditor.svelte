@@ -274,6 +274,14 @@
     min-width: 2rem;
     font-weight: 600;
     font-family: var(--font-family-mono);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .format-icon {
+    width: 1rem;
+    height: 1rem;
   }
 
   .editor-content {
