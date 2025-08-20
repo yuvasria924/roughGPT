@@ -276,6 +276,14 @@
     flex: 1;
     min-width: 150px;
     justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .tab-icon {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .tab-content {
