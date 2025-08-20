@@ -293,9 +293,21 @@
 	}
 
 	.feature-icon {
-		font-size: 2.5rem;
 		margin-bottom: var(--space-3);
-		display: block;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 3rem;
+		height: 3rem;
+		background-color: var(--color-primary);
+		border-radius: var(--radius-lg);
+		color: white;
+		margin: 0 auto var(--space-3) auto;
+	}
+
+	.feature-svg {
+		width: 1.5rem;
+		height: 1.5rem;
 	}
 
 	.feature-title {
