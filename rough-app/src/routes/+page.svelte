@@ -75,19 +75,27 @@
 	<div class="hero-section">
 		<div class="hero-content">
 			<div class="hero-badge">
-				<span class="badge-text">Vector Database Management</span>
+				<span class="badge-icon">💎</span>
+				<span class="badge-text">Professional Vector Database</span>
+				<span class="badge-sparkle">✨</span>
 			</div>
 			<h1 class="hero-title">{data.title}</h1>
 			<p class="hero-description">
-				Connect to your Pinecone database and start managing your vector data with modern, elegant interface design.
+				Connect to your Pinecone database and manage vector data with elegant, anime-inspired design that balances beauty with functionality.
 			</p>
+			<div class="hero-ornaments">
+				<div class="floating-ornament ornament-1">🌟</div>
+				<div class="floating-ornament ornament-2">💫</div>
+				<div class="floating-ornament ornament-3">✨</div>
+				<div class="floating-ornament ornament-4">💎</div>
+			</div>
 		</div>
 	</div>
 
 	<Card size="lg" variant="elevated" customClass="connection-card">
 		<div class="card-header">
-			<h2 class="card-title">Database Connection</h2>
-			<p class="card-subtitle">Enter your Pinecone credentials to get started</p>
+			<h2 class="card-title">✨ Database Connection Portal</h2>
+			<p class="card-subtitle">Enter your credentials to access the elegant database interface</p>
 		</div>
 
 		<form class="connection-form" onsubmit={handleConnect}>
@@ -125,60 +133,107 @@
 
 			{#if error}
 				<div class="error-message" role="alert">
-					<svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
-						<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zM9.25 14a.75.75 0 011.5 0v.01a.75.75 0 01-1.5 0V14z" clip-rule="evenodd" />
-					</svg>
-					{error}
+					<span class="error-icon">⚠️</span>
+					<div class="error-content">
+						<span class="error-text">{error}</span>
+						<span class="error-note">Please check your credentials and try again</span>
+					</div>
 				</div>
 			{/if}
 
 			<Button
 				type="submit"
-				variant="primary"
+				variant="anime-gradient"
 				size="lg"
 				loading={isConnecting}
 				fullWidth
 			>
 				{#if isConnecting}
 					<span class="loading-content">
-						Connecting...
+						<span class="loading-icon">🌟</span>
+						Establishing connection...
 					</span>
 				{:else}
-					Connect to Pinecone
+					<span class="connect-content">
+						<span class="connect-icon">⚡</span>
+						Connect to Pinecone
+						<span class="connect-sparkle">💫</span>
+					</span>
 				{/if}
 			</Button>
 		</form>
 	</Card>
 
 	<div class="features-grid">
-		<Card size="md" hoverable customClass="feature-card">
-			<div class="feature-icon">
-				<svg viewBox="0 0 24 24" fill="currentColor" class="feature-svg">
-					<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke="currentColor" stroke-width="2" fill="none" />
-				</svg>
+		<Card size="md" hoverable customClass="feature-card vector-search">
+			<div class="feature-header">
+				<div class="feature-icon">
+					<span class="feature-emoji">🔍</span>
+					<div class="icon-decoration">
+						<div class="decoration decoration-1">✨</div>
+						<div class="decoration decoration-2">⭐</div>
+					</div>
+				</div>
 			</div>
 			<h3 class="feature-title">Vector Search</h3>
-			<p class="feature-description">Perform semantic searches across your vector data with precision and speed.</p>
+			<p class="feature-description">Perform sophisticated semantic searches across your vector data with professional precision and elegant interface design.</p>
+			<div class="feature-metrics">
+				<span class="metric">⚡ Ultra Fast</span>
+				<span class="metric">🎯 Precise</span>
+			</div>
 		</Card>
 
-		<Card size="md" hoverable customClass="feature-card">
-			<div class="feature-icon">
-				<svg viewBox="0 0 24 24" fill="currentColor" class="feature-svg">
-					<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-				</svg>
+		<Card size="md" hoverable customClass="feature-card note-management">
+			<div class="feature-header">
+				<div class="feature-icon">
+					<span class="feature-emoji">📚</span>
+					<div class="icon-decoration">
+						<div class="decoration decoration-1">💖</div>
+						<div class="decoration decoration-2">🌸</div>
+					</div>
+				</div>
 			</div>
 			<h3 class="feature-title">Note Management</h3>
-			<p class="feature-description">Create, edit, and organize your notes with powerful indexing capabilities.</p>
+			<p class="feature-description">Create, edit, and organize your notes with powerful AI-driven indexing and beautifully designed management tools.</p>
+			<div class="feature-metrics">
+				<span class="metric">🤖 AI Powered</span>
+				<span class="metric">📝 Rich Editor</span>
+			</div>
 		</Card>
 
-		<Card size="md" hoverable customClass="feature-card">
-			<div class="feature-icon">
-				<svg viewBox="0 0 24 24" fill="currentColor" class="feature-svg">
-					<path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-				</svg>
+		<Card size="md" hoverable customClass="feature-card real-time">
+			<div class="feature-header">
+				<div class="feature-icon">
+					<span class="feature-emoji">⚡</span>
+					<div class="icon-decoration">
+						<div class="decoration decoration-1">💫</div>
+						<div class="decoration decoration-2">🌟</div>
+					</div>
+				</div>
 			</div>
 			<h3 class="feature-title">Real-time Sync</h3>
-			<p class="feature-description">Keep your data synchronized across all your devices with instant updates.</p>
+			<p class="feature-description">Keep your data synchronized across all devices with instant updates, elegant notifications, and professional reliability.</p>
+			<div class="feature-metrics">
+				<span class="metric">🔄 Auto Sync</span>
+				<span class="metric">📱 Cross Device</span>
+			</div>
+		</Card>
+	</div>
+
+	<div class="call-to-action">
+		<Card variant="elevated" size="lg" customClass="cta-card">
+			<div class="cta-content">
+				<h2 class="cta-title">Ready to elevate your workflow? ✨</h2>
+				<p class="cta-description">Join developers who trust our elegant, professional platform</p>
+				<div class="cta-buttons">
+					<Button variant="anime-gradient" size="lg">
+						🚀 Get Started Now
+					</Button>
+					<Button variant="elegant" size="lg">
+						💡 Learn More
+					</Button>
+				</div>
+			</div>
 		</Card>
 	</div>
 </main>
@@ -190,15 +245,17 @@
 		flex-direction: column;
 		align-items: center;
 		padding: var(--space-8) var(--space-4);
-		gap: var(--space-12);
-		max-width: 1200px;
+		gap: var(--space-16);
+		max-width: 1400px;
 		margin: 0 auto;
+		position: relative;
 	}
 
 	.hero-section {
 		text-align: center;
-		max-width: 600px;
-		margin-top: var(--space-16);
+		max-width: 800px;
+		position: relative;
+		z-index: 2;
 	}
 
 	.hero-content {
@@ -208,73 +265,195 @@
 	.hero-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: var(--space-2);
-		background: rgba(255, 255, 255, 0.2);
-		backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.3);
+		gap: var(--space-3);
+		background: linear-gradient(135deg, 
+			rgba(255, 255, 255, 0.2),
+			rgba(255, 228, 225, 0.15),
+			rgba(230, 230, 250, 0.15),
+			rgba(255, 255, 255, 0.2)
+		);
+		backdrop-filter: blur(15px);
+		border: 2px solid rgba(255, 255, 255, 0.3);
 		border-radius: var(--radius-full);
-		padding: var(--space-2) var(--space-4);
-		margin-bottom: var(--space-6);
-		animation: scaleIn var(--transition-base) ease-out 0.3s both;
+		padding: var(--space-3) var(--space-6);
+		margin-bottom: var(--space-8);
+		animation: elegantFloat 6s ease-in-out infinite;
+		box-shadow: 0 8px 25px rgba(255, 105, 180, 0.15);
 	}
 
 	[data-theme="dark"] .hero-badge {
-		background: rgba(15, 23, 42, 0.4);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		background: linear-gradient(135deg, 
+			rgba(45, 27, 105, 0.3),
+			rgba(139, 92, 246, 0.25),
+			rgba(168, 85, 247, 0.25),
+			rgba(45, 27, 105, 0.3)
+		);
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+	}
+
+	@keyframes elegantFloat {
+		0%, 100% {
+			transform: translateY(0) rotate(0deg);
+		}
+		50% {
+			transform: translateY(-8px) rotate(1deg);
+		}
+	}
+
+	.badge-icon {
+		font-size: var(--font-size-lg);
+		animation: iconShimmer 4s linear infinite;
+	}
+
+	.badge-sparkle {
+		animation: sparkleRotate 3s linear infinite;
+	}
+
+	@keyframes iconShimmer {
+		0% { transform: rotate(0deg) scale(1); }
+		25% { transform: rotate(90deg) scale(1.1); }
+		50% { transform: rotate(180deg) scale(1); }
+		75% { transform: rotate(270deg) scale(1.1); }
+		100% { transform: rotate(360deg) scale(1); }
+	}
+
+	@keyframes sparkleRotate {
+		0% { transform: rotate(0deg) scale(1); }
+		50% { transform: rotate(180deg) scale(1.3); }
+		100% { transform: rotate(360deg) scale(1); }
 	}
 
 	.badge-text {
 		color: var(--text-primary);
-		font-weight: 500;
-		font-size: var(--font-size-sm);
+		font-weight: 600;
+		font-size: var(--font-size-base);
 	}
 
 	.hero-title {
-		font-size: clamp(2.5rem, 8vw, 4rem);
-		font-weight: 700;
+		font-size: clamp(3rem, 10vw, 5.5rem);
+		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: var(--space-4);
-		line-height: 1.1;
-		background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+		margin-bottom: var(--space-6);
+		line-height: 1;
+		background: linear-gradient(135deg, #FF69B4 0%, #9932CC 25%, #4169E1 50%, #FF6347 75%, #FF69B4 100%);
+		background-size: 200% 200%;
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
+		animation: titleGradient 4s ease-in-out infinite;
+		filter: drop-shadow(0 4px 8px rgba(255, 105, 180, 0.2));
+	}
+
+	@keyframes titleGradient {
+		0%, 100% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
 	}
 
 	.hero-description {
-		font-size: var(--font-size-lg);
+		font-size: var(--font-size-xl);
 		color: var(--text-secondary);
 		line-height: var(--line-height-relaxed);
 		margin-bottom: var(--space-8);
+		animation: fadeIn var(--transition-slow) ease-out 0.5s both;
+	}
+
+	.hero-ornaments {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+
+	.floating-ornament {
+		position: absolute;
+		font-size: 1.5rem;
+		animation: ornamentFloat 10s infinite ease-in-out;
+		filter: drop-shadow(0 0 8px currentColor);
+	}
+
+	.ornament-1 {
+		top: 15%;
+		left: 15%;
+		color: #FF69B4;
+		animation-delay: 0s;
+	}
+
+	.ornament-2 {
+		top: 25%;
+		right: 20%;
+		color: #9932CC;
+		animation-delay: 2.5s;
+	}
+
+	.ornament-3 {
+		bottom: 30%;
+		left: 25%;
+		color: #4169E1;
+		animation-delay: 5s;
+	}
+
+	.ornament-4 {
+		bottom: 35%;
+		right: 30%;
+		color: #FF6347;
+		animation-delay: 7.5s;
+	}
+
+	@keyframes ornamentFloat {
+		0%, 100% {
+			transform: translate(0, 0) rotate(0deg) scale(1);
+		}
+		25% {
+			transform: translate(15px, -15px) rotate(90deg) scale(1.1);
+		}
+		50% {
+			transform: translate(-8px, -25px) rotate(180deg) scale(0.9);
+		}
+		75% {
+			transform: translate(-20px, -8px) rotate(270deg) scale(1.05);
+		}
 	}
 
 	.connection-card {
 		width: 100%;
-		max-width: 500px;
-		animation: scaleIn var(--transition-slow) ease-out 0.2s both;
+		max-width: 600px;
+		animation: scaleIn var(--transition-slow) ease-out 0.7s both;
+		position: relative;
+		z-index: 2;
 	}
 
 	.card-header {
 		text-align: center;
-		margin-bottom: var(--space-6);
+		margin-bottom: var(--space-8);
 	}
 
 	.card-title {
-		font-size: var(--font-size-2xl);
-		font-weight: 600;
-		color: var(--text-primary);
-		margin-bottom: var(--space-2);
+		font-size: var(--font-size-3xl);
+		font-weight: 700;
+		background: linear-gradient(135deg, #FF69B4, #9932CC, #4169E1);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		margin-bottom: var(--space-3);
 	}
 
 	.card-subtitle {
 		color: var(--text-secondary);
-		font-size: var(--font-size-base);
+		font-size: var(--font-size-lg);
+		font-style: italic;
 	}
 
 	.connection-form {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-4);
+		gap: var(--space-6);
 	}
 
 	.form-row {
@@ -285,82 +464,253 @@
 
 	.error-message {
 		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		padding: var(--space-3) var(--space-4);
-		background-color: #fef2f2;
-		border: 1px solid #fecaca;
-		border-radius: var(--radius-md);
-		color: var(--color-error);
-		font-size: var(--font-size-sm);
-		animation: slideUp var(--transition-base) ease-out;
-	}
-
-	[data-theme="dark"] .error-message {
-		background-color: rgba(239, 68, 68, 0.1);
-		border-color: rgba(239, 68, 68, 0.3);
+		align-items: flex-start;
+		gap: var(--space-3);
+		padding: var(--space-4) var(--space-5);
+		background: linear-gradient(135deg, 
+			rgba(255, 182, 193, 0.15),
+			rgba(255, 240, 245, 0.2)
+		);
+		border: 2px solid rgba(255, 105, 180, 0.2);
+		border-radius: var(--radius-xl);
+		animation: errorSlide 0.5s ease-out;
 	}
 
 	.error-icon {
-		width: 1.25rem;
-		height: 1.25rem;
-		flex-shrink: 0;
+		font-size: 1.2rem;
+		margin-top: 2px;
+	}
+
+	.error-content {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.error-text {
+		color: var(--color-error);
+		font-weight: 500;
+		font-size: var(--font-size-base);
+	}
+
+	.error-note {
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+		font-style: italic;
+	}
+
+	@keyframes errorSlide {
+		0% { 
+			transform: translateX(-10px);
+			opacity: 0;
+		}
+		100% { 
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+
+	.loading-content,
+	.connect-content {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		font-size: var(--font-size-lg);
+		font-weight: 600;
+	}
+
+	.loading-icon {
+		animation: loadingSpin 1.5s linear infinite;
+		font-size: 1.2rem;
+	}
+
+	@keyframes loadingSpin {
+		0% { transform: rotate(0deg) scale(1); }
+		50% { transform: rotate(180deg) scale(1.2); }
+		100% { transform: rotate(360deg) scale(1); }
 	}
 
 	.features-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: var(--space-6);
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: var(--space-8);
 		width: 100%;
-		max-width: 800px;
-		animation: fadeIn var(--transition-slow) ease-out 0.4s both;
+		max-width: 1200px;
+		animation: fadeIn var(--transition-slow) ease-out 0.9s both;
 	}
 
 	.feature-card {
 		text-align: center;
-		transition: transform var(--transition-base);
+		position: relative;
+		overflow: visible;
+	}
+
+	.feature-header {
+		margin-bottom: var(--space-5);
+		position: relative;
 	}
 
 	.feature-icon {
-		margin-bottom: var(--space-3);
-		display: flex;
-		justify-content: center;
+		position: relative;
+		display: inline-flex;
 		align-items: center;
-		width: 3rem;
-		height: 3rem;
-		background-color: var(--color-primary);
-		border-radius: var(--radius-lg);
-		color: white;
-		margin: 0 auto var(--space-3) auto;
+		justify-content: center;
+		width: 80px;
+		height: 80px;
+		border-radius: var(--radius-2xl);
+		background: linear-gradient(135deg, 
+			rgba(255, 255, 255, 0.2),
+			rgba(255, 228, 225, 0.15),
+			rgba(255, 255, 255, 0.2)
+		);
+		margin: 0 auto var(--space-4) auto;
+		transition: all var(--transition-base);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		box-shadow: 0 8px 25px rgba(255, 105, 180, 0.15);
+		backdrop-filter: blur(10px);
 	}
 
-	.feature-svg {
-		width: 1.5rem;
-		height: 1.5rem;
+	.feature-emoji {
+		font-size: 2.2rem;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+	}
+
+	.icon-decoration {
+		position: absolute;
+		top: -8px;
+		right: -8px;
+		width: 20px;
+		height: 20px;
+	}
+
+	.decoration {
+		position: absolute;
+		font-size: 0.7rem;
+		animation: decorationSparkle 3s infinite ease-in-out;
+	}
+
+	.decoration-1 {
+		top: 0;
+		left: 0;
+		animation-delay: 0s;
+	}
+
+	.decoration-2 {
+		bottom: 0;
+		right: 0;
+		animation-delay: 1.5s;
+	}
+
+	@keyframes decorationSparkle {
+		0%, 100% {
+			opacity: 0;
+			transform: scale(0.5);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.2);
+		}
+	}
+
+	.feature-card:hover .feature-icon {
+		transform: scale(1.1) rotate(8deg);
+		box-shadow: 0 15px 35px rgba(255, 105, 180, 0.3);
+		background: linear-gradient(135deg, 
+			rgba(255, 105, 180, 0.2),
+			rgba(153, 50, 204, 0.15),
+			rgba(255, 105, 180, 0.2)
+		);
 	}
 
 	.feature-title {
-		font-size: var(--font-size-lg);
-		font-weight: 600;
-		color: var(--text-primary);
-		margin-bottom: var(--space-2);
+		font-size: var(--font-size-2xl);
+		font-weight: 700;
+		background: linear-gradient(135deg, #FF69B4, #9932CC, #4169E1);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		margin-bottom: var(--space-4);
 	}
 
 	.feature-description {
 		color: var(--text-secondary);
-		font-size: var(--font-size-sm);
+		font-size: var(--font-size-base);
 		line-height: var(--line-height-relaxed);
+		margin-bottom: var(--space-4);
+	}
+
+	.feature-metrics {
+		display: flex;
+		justify-content: center;
+		gap: var(--space-4);
+		flex-wrap: wrap;
+	}
+
+	.metric {
+		background: linear-gradient(135deg, 
+			rgba(255, 105, 180, 0.1),
+			rgba(153, 50, 204, 0.1)
+		);
+		border: 1px solid rgba(255, 105, 180, 0.2);
+		border-radius: var(--radius-full);
+		padding: var(--space-2) var(--space-4);
+		font-size: var(--font-size-sm);
+		font-weight: 500;
+		color: var(--text-primary);
+		backdrop-filter: blur(5px);
+	}
+
+	.call-to-action {
+		width: 100%;
+		max-width: 800px;
+		animation: fadeIn var(--transition-slow) ease-out 1.1s both;
+	}
+
+	.cta-card {
+		text-align: center;
+	}
+
+	.cta-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-6);
+	}
+
+	.cta-title {
+		font-size: var(--font-size-3xl);
+		font-weight: 700;
+		background: linear-gradient(135deg, #FF69B4, #9932CC, #4169E1, #FF6347);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.cta-description {
+		font-size: var(--font-size-lg);
+		color: var(--text-secondary);
+	}
+
+	.cta-buttons {
+		display: flex;
+		gap: var(--space-4);
+		flex-wrap: wrap;
+		justify-content: center;
 	}
 
 	/* Responsive design */
 	@media (max-width: 768px) {
 		.main-container {
 			padding: var(--space-4) var(--space-2);
-			gap: var(--space-8);
+			gap: var(--space-12);
 		}
 
-		.hero-section {
-			margin-top: var(--space-8);
+		.hero-title {
+			font-size: 2.8rem;
+		}
+
+		.hero-description {
+			font-size: var(--font-size-lg);
 		}
 
 		.form-row {
@@ -369,17 +719,34 @@
 
 		.features-grid {
 			grid-template-columns: 1fr;
-			gap: var(--space-4);
+			gap: var(--space-6);
+		}
+
+		.floating-ornament {
+			font-size: 1.2rem;
+		}
+
+		.cta-buttons {
+			flex-direction: column;
+			width: 100%;
 		}
 	}
 
-	@media (max-width: 480px) {
-		.hero-title {
-			font-size: 2rem;
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.hero-badge,
+		.floating-ornament,
+		.loading-icon,
+		.decoration {
+			animation: none;
 		}
-
-		.hero-description {
-			font-size: var(--font-size-base);
+		
+		.hero-title {
+			animation: none;
+			background: linear-gradient(135deg, #FF69B4, #9932CC, #4169E1);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
 		}
 	}
 </style>
