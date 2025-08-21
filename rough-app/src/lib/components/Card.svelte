@@ -42,12 +42,24 @@
 
 <style>
   .card {
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-primary);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-4);
     border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     transition: all var(--transition-base);
     position: relative;
     overflow: hidden;
+  }
+
+  [data-theme="dark"] .card {
+    background: rgba(15, 23, 42, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
   /* Sizes */
@@ -69,23 +81,42 @@
 
   /* Variants */
   .card-default {
-    background-color: var(--bg-primary);
+    /* Default glassmorphism already applied above */
   }
 
   .card-elevated {
-    box-shadow: var(--shadow-md);
-    border: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  [data-theme="dark"] .card-elevated {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   }
 
   .card-outlined {
-    border: 2px solid var(--border-secondary);
-    background-color: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  [data-theme="dark"] .card-outlined {
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 23, 42, 0.2);
   }
 
   /* Interactive States */
   .card-hoverable:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  [data-theme="dark"] .card-hoverable:hover {
+    background: rgba(15, 23, 42, 0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   }
 
   .card-clickable {
@@ -94,13 +125,19 @@
   }
 
   .card-clickable:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  [data-theme="dark"] .card-clickable:hover {
+    background: rgba(15, 23, 42, 0.4);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
   }
 
   .card-clickable:active {
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px) scale(1.005);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   }
 
   .card-clickable:focus {
@@ -108,23 +145,29 @@
     outline-offset: 2px;
   }
 
-  /* Dark mode adjustments */
-  [data-theme="dark"] .card {
-    background-color: var(--bg-secondary);
-    border-color: var(--border-primary);
-  }
-
-  [data-theme="dark"] .card-elevated {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  }
-
-  [data-theme="dark"] .card-hoverable:hover,
-  [data-theme="dark"] .card-clickable:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  }
-
   /* Animation on mount */
   .card {
     animation: slideUp var(--transition-slow) ease-out;
+  }
+
+  /* Shimmer effect for glass cards */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+
+  .card:hover::before {
+    left: 100%;
   }
 </style>
