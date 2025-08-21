@@ -84,13 +84,27 @@
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-tertiary: #334155;
-  
+
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-tertiary: #94a3b8;
-  
+
   --border-primary: #334155;
   --border-secondary: #475569;
+
+  /* Dark mode specific glassmorphism colors */
+  --glass-bg-primary: rgba(15, 23, 42, 0.3);
+  --glass-bg-secondary: rgba(30, 41, 59, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-hover: rgba(15, 23, 42, 0.5);
+}
+
+/* Light mode glassmorphism colors */
+:root {
+  --glass-bg-primary: rgba(255, 255, 255, 0.15);
+  --glass-bg-secondary: rgba(255, 255, 255, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-hover: rgba(255, 255, 255, 0.3);
 }
 
 /* Reset & Base Styles */
@@ -151,6 +165,19 @@ input, textarea, select, button {
 
 :focus:not(:focus-visible) {
   outline: none;
+}
+
+/* Enhanced focus for glassmorphism elements */
+.glass-card:focus,
+.glass-card:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1), 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .glass-card:focus,
+[data-theme="dark"] .glass-card:focus-within {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* Animation Classes */
@@ -276,13 +303,144 @@ input, textarea, select, button {
 
 .transition { transition: all var(--transition-base); }
 
+/* Anime-themed utility classes */
+.glass-card {
+  background: var(--glass-bg-primary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .glass-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card:hover {
+  background: var(--glass-hover);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.anime-glow {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+.anime-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.anime-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.anime-shimmer:hover::before {
+  left: 100%;
+}
+
+/* Floating animations for background elements */
+.float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+
+.float-medium {
+  animation: float 4s ease-in-out infinite;
+}
+
+.float-fast {
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Glow effect for buttons and interactive elements */
+.glow-on-hover {
+  transition: all var(--transition-base);
+}
+
+.glow-on-hover:hover {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .glow-on-hover:hover {
+  box-shadow: 0 0 25px rgba(37, 99, 235, 0.6);
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-base);
+  transition: background var(--transition-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Selection colors */
+::selection {
+  background: rgba(37, 99, 235, 0.3);
+  color: var(--text-primary);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
     padding: 0 var(--space-2);
   }
-  
+
   h1 { font-size: var(--font-size-3xl); }
   h2 { font-size: var(--font-size-2xl); }
   h3 { font-size: var(--font-size-xl); }
+
+  /* Reduce animation intensity on mobile */
+  .anime-shimmer::before {
+    display: none;
+  }
+
+  .glow-on-hover:hover {
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+  }
 }
